@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ltrack">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ltrack</title>
+    <link rel="stylesheet" type="text/css"
+          href="css/normalize.css">
+    <link rel="stylesheet" type="text/css"
+          href="css/skeleton.css">
+    <link rel="stylesheet" type="text/css"
+          href="css/custom.css">
+    <script data-main="js/main"
+            src="js/vendor/bower/requirejs/require.js">
+  </script>
+  </head>
+  <body>
+
+    <section ng-controller="CurrEntCtrl">
+      <div class="container"
+           ng-show="!loading && curr_ent">
+        <div class="row">
+          <div class="three columns">&nbsp</div>
+          <div class="six columns">
+            <h3>You are currently {{curr_ent.act_name}}.</h3>
+            <button ng-click="stopEnt()">
+              Done
+            </button>
+          </div>
+          <div class="three columns">&nbsp</div>
+      </div>
+    </section>
+
+    <nav ng-controller="HeaderCtrl">
+      <ul ng-show="logged_in()">
+        <li>
+          <a>
+            Add Activity
+          </a>
+        </li>
+        <li>
+          <a>
+            View records
+          </a>
+        </li>
+      </ul>
+
+      <ul>
+        <li ng-hide="logged_in()">
+          <a href="/login">
+            <button>Login</button>
+          </a>
+        </li>
+        <li ng-show="logged_in()">
+          <a href="/logout">
+            <button>Logout</button>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="container">
+      <div ng-view></div>
+    </div>
+  </body>
+</html>

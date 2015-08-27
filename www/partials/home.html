@@ -1,0 +1,59 @@
+<h1>Hiya</h1>
+
+<section ng-hide="logged_in()">
+  <div class="row">
+    <div class="three columns">&nbsp</div>
+    <div class="six columns">
+      <form name="signupForm" novalidate>
+        <div>
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username"
+                 ng-model="signup.username"
+                 placeholder="Enter username">
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password"
+                 ng-model="signup.password"
+                 placeholder="Enter password">
+        </div>
+        <div>
+          <label for="password-confirm">Confirm password</label>
+          <input type="password" name="password_confirm"
+                 id="password_confirm"
+                 ng-model="signup.password_confirm"
+                 placeholder="Re-enter password">
+        </div>
+        <button ng-click="signupUser(signupForm)"
+                ng-disabled="loading"
+                class="btn">
+          Submit
+        </button>
+      </form>
+    </div>
+    <div class="three columns">&nbsp</div>
+  </div>
+</section>
+
+<section ng-show="logged_in()">
+  <div class="row">
+    <div class="four columns">&nbsp</div>
+    <div class="four columns">
+      <form name="entForm" novalidate>
+        <label for="act">Activity type</label>
+        <select name="act" id="act"
+                ng-model="ent.act">
+          <option ng-repeat="act in acts"
+                  val="{{act.id}}">
+            {{act.name}}
+          </option>
+        <button ng-click="addEnt(entForm)"
+                ng-disabled="loading"
+                class="btn">
+          Submit
+        </button>
+      </form>
+    </div>
+    <div class="four columns">&nbsp</div>
+  </div>
+</section>

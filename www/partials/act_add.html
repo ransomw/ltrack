@@ -1,0 +1,32 @@
+<div class="row">
+  <div class="three columns">&nbsp</div>
+  <div class="six columns">
+    <h3>Create activity</h3>
+    <form name="actForm" novalidate>
+      <div>
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name"
+               ng-model="act.name"
+               placeholder="Enter activity name">
+      </div>
+      <div>
+        <label for="type">Type</label>
+        <select type="select" name="type" id="type"
+                ng-model="act.type">
+          <option value="{{ACT_TYPES.interval}}">
+            Time interval
+          </option>
+          <option value="{{ACT_TYPES.point}}">
+            Point in time
+          </option>
+        </select>
+      </div>
+      <button ng-click="addAct(actForm)"
+              ng-disabled="loading"
+              class="btn">
+        Submit
+      </button>
+    </form>
+  </div>
+  <div class="three columns">&nbsp</div>
+</div>
