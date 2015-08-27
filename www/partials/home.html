@@ -38,7 +38,7 @@
   <div class="row">
     <div class="four columns">&nbsp</div>
     <div class="four columns">
-      <div ng-show="acts">
+      <div ng-show="acts && acts.length !== 0">
         <h3>What's up?</h3>
         <form name="entForm" novalidate>
           <label for="act">Activity type</label>
@@ -56,7 +56,7 @@
           </button>
         </form>
       </div>
-      <div ng-hide="acts">
+      <div ng-hide="acts && acts.length !== 0">
         <a href="#/activity/new">
           <h4>What do you like to do?</h4>
         </a>

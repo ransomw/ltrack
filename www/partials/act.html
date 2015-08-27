@@ -1,0 +1,36 @@
+<section class="act">
+  <div class="row"
+       ng-hide="loading_act || loading_ents">
+    <div class="two columns">&nbsp</div>
+    <div class="eight columns">
+      <h3>{{act.name}} records</h3>
+      <table ng-show="act.atype === ACT_TYPES.interval">
+        <thead>
+          <tr>
+            <th>start</th>
+            <th>end</th>
+            <th>total</th>
+            <th>delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="ent in ents">
+            <td>{{dateStr(ent.date_start)}}</td>
+            <td>{{dateStr(ent.date_stop)}}</td>
+            <td>{{dateDiffStr(ent.date_start, ent.date_stop)}}</td>
+            <td>
+              <button ng-click="delEnt(ent)">X</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <a href="#/entry/new/{{act.id}}"
+         class="button"
+         ng-show="act.atype === ACT_TYPES.interval">
+        Add Entry
+      </a>
+    </div>
+    <div class="two columns">&nbsp</div>
+  </div>
+</section>
+

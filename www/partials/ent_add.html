@@ -1,0 +1,38 @@
+<section class="ent-add"
+         ng-hide="loading_act">
+  <div class="row">
+    <div class="three columns">&nbsp</div>
+    <div class="six columns">
+      <h3>Manual {{act.name}} entry</h3>
+      <h5>using the homepage is suggested</h5>
+      <form name="actForm" novalidate>
+        <div>
+          <label for="date-start">Start date</label>
+          <input type="date" name="date-start" id="date-start"
+                 ng-model="ent.date_start">
+        </div>
+        <div>
+          <label for="time-start">Start time</label>
+          <input type="time" name="time-start" id="time-start"
+                 ng-model="ent.time_start">
+        </div>
+        <div>
+          <label for="date-stop">Stop date</label>
+          <input type="date" name="date-stop" id="date-stop"
+                 ng-model="ent.date_stop">
+        </div>
+        <div>
+          <label for="time-stop">Stop time</label>
+          <input type="time" name="time-stop" id="time-stop"
+                 ng-model="ent.time_stop">
+        </div>
+        <button ng-click="addAct(actForm)"
+                ng-disabled="submitted || loading_act"
+                class="btn">
+          Submit
+        </button>
+      </form>
+    </div>
+    <div class="three columns">&nbsp</div>
+  </div>
+</section>

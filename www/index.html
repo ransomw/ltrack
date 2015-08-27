@@ -44,7 +44,7 @@
           </a>
         </li>
         <li>
-          <a>
+          <a href="#/activities">
             View records
           </a>
         </li>
@@ -52,13 +52,15 @@
 
       <ul class="actions">
         <li ng-hide="logged_in()">
-          <a href="#/login">
-            <button>Login</button>
+          <a href="#/login"
+             class="button">
+            Login
           </a>
         </li>
         <li ng-show="logged_in()">
-          <a href="#/logout">
-            <button>Logout</button>
+          <a href="#/logout"
+             class="button">
+            Logout
           </a>
         </li>
       </ul>

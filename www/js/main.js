@@ -4,7 +4,8 @@ require.config({
     angularRoute: 'vendor/bower/angular-route/angular-route',
     hoodie: '../_api/_files/hoodie',
     lodash: 'vendor/bower/lodash/dist/lodash.min',
-    jquery: 'vendor/bower/jquery/dist/jquery.min'
+    jquery: 'vendor/bower/jquery/dist/jquery.min',
+    moment: 'vendor/bower/moment/min/moment.min'
   },
   baseUrl: 'js',
   shim: {
@@ -56,6 +57,18 @@ require([
            .when('/activity/new', {
              templateUrl: CONST.PARTIAL_BASE + 'act_add.html',
              controller: 'ActAddCtrl'
+           })
+           .when('/activity/:id', {
+             templateUrl: CONST.PARTIAL_BASE + 'act.html',
+             controller: 'ActCtrl'
+           })
+           .when('/activities', {
+             templateUrl: CONST.PARTIAL_BASE + 'acts.html',
+             controller: 'ActsCtrl'
+           })
+           .when('/entry/new/:act_id', {
+             templateUrl: CONST.PARTIAL_BASE + 'ent_add.html',
+             controller: 'EntAddCtrl'
            })
            .otherwise({
              redirectTo: '/'

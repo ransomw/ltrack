@@ -2,8 +2,9 @@ define([
   'angular',
   'constants',
   'hoodie',
-  'lodash'
-], function (angular, CONST, Hoodie, _) {
+  'lodash',
+  'moment'
+], function (angular, CONST, Hoodie, _, moment) {
 
   /*
    activity:  name, atype
@@ -26,6 +27,15 @@ define([
   };
 
   var hoodie = new Hoodie();
+
+  var log_throw_err = function (err, msg) {
+    if (!msg) {
+      msg = "unspecified error";
+    }
+    console.log(msg);
+    console.log(err);
+    throw new Error(msg);
+  };
 
   var logged_in = function () {
     if (hoodie.account.username) {
@@ -133,8 +143,8 @@ define([
           .done(function (acts) {
             $scope.$apply(function () {
               $scope.acts = acts;
+              $scope.loading = false;
             });
-            $scope.loading = false;
           })
           .fail(function (err) {
             console.log(
@@ -154,7 +164,7 @@ define([
           return;
         }
         hoodie.account.signUp(
-          $scope.signup.username, $scope.signup.password)
+          $scope.signup.username.trim(), $scope.signup.password)
           .done(function (username) {
             // todo: sign in user s.t. views update
             alert("signed up!");
@@ -201,7 +211,6 @@ define([
               } else {
                 hoodie.store.add(STORE_TYPES.curr_ent, ent)
                   .done(function (ent) {
-                    alert("started interval entry");
                     $scope.loading = false;
                   })
                   .fail(function (err) {
@@ -286,8 +295,6 @@ define([
         // hoodie sets id attribute automatically
         hoodie.store.add(STORE_TYPES.act, $scope.act)
           .done(function (act) {
-            console.log("added activity");
-            console.log(act);
             $scope.$apply(function () {
               $location.path('/');
             });
@@ -300,5 +307,161 @@ define([
           });
       };
     }]);
+
+  controllers.controller('ActsCtrl', [
+    '$scope',
+    function ActsCtrl($scope) {
+      $scope.loading = true;
+      hoodie.store.findAll(STORE_TYPES.act)
+        .done(function (acts) {
+          $scope.$apply(function () {
+            $scope.acts = acts;
+            $scope.loading = false;
+          });
+        })
+        .fail(function (err) {
+          console.log(
+            "looking up all activities for home ctrl failed");
+          console.log(err);
+          throw new Error(
+            "looking up all activities for home ctrl failed");
+        });
+      }]);
+
+
+  controllers.controller('ActCtrl', [
+    '$scope', '$routeParams',
+    function ActCtrl($scope, $routeParams) {
+      var update_ents = function () {
+        $scope.loading_ents = true;
+        hoodie.store.findAll(STORE_TYPES.ent)
+          .done(function (ents) {
+            $scope.$apply(function () {
+              $scope.ents = ents.filter(function (ent) {
+                return ent.act === $routeParams.id;
+              }).sort(function (ent1, ent2) {
+                var date1, date2;
+                if (ent1.date_start) {
+                  date1 = new Date(ent1.date_start);
+                  date2 = new Date(ent2.date_start);
+                } else {
+                  date1 = new Date(ent1.date);
+                  date2 = new Date(ent2.date);
+                }
+                return date1 - date2;
+              });
+              $scope.loading_ents = false;
+            });
+          })
+          .fail(function (err) { log_throw_err(err); });
+      };
+
+      $scope.loading_act = true;
+      $scope.loading_ents = true;
+      $scope.ACT_TYPES = _.cloneDeep(ACT_TYPES);
+
+      $scope.dateStr = function (date) {
+        var m;
+        if (!date) {
+          return "";
+        }
+        m = moment(date);
+        return m.format(
+          'MMM D H:mm'
+        );
+      };
+
+      $scope.dateDiffStr = function (start, end) {
+        var sec = Math.floor((end - start)/1000);
+        var min = Math.floor(sec/60);
+        var hr;
+        start = new Date(start);
+        end = new Date(end);
+        sec = Math.floor((end - start)/1000);
+        min = Math.floor(sec/60);
+        if (min < 60) {
+          return min + "min";
+        }
+        hr = min/60;
+        return hr.toFixed(1) + "hr";
+      };
+
+      $scope.delEnt = function (ent) {
+        hoodie.store.remove(STORE_TYPES.ent, ent.id)
+          .done(function (dent) {
+            update_ents();
+          }).fail(function (err) { log_throw_err(err); });
+      };
+
+      hoodie.store.find(STORE_TYPES.act, $routeParams.id)
+        .done(function (act) {
+          $scope.$apply(function () {
+            $scope.act = act;
+            $scope.loading_act = false;
+          });
+        })
+        .fail(function (err) { log_throw_err(err); });
+
+      update_ents();
+
+    }]);
+
+  controllers.controller('EntAddCtrl', [
+    '$scope', '$routeParams', '$location',
+    function EntAddCtrl($scope, $routeParams, $location) {
+      var now = new Date();
+
+      var combine_date_time = function (date, time) {
+        return new Date(date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate(),
+                        time.getHours(),
+                        time.getMinutes(),
+                        time.getSeconds());
+      };
+
+      $scope.ent = {};
+      $scope.ent.date_start = now;
+      $scope.ent.date_stop = now;
+      $scope.ent.time_start = now;
+      $scope.ent.time_stop = now;
+
+      $scope.addAct = function (actForm) {
+        $scope.submitted = true;
+        var ent = {};
+        if (!$scope.ent ||
+            !$scope.ent.date_start ||
+            !$scope.ent.date_stop ||
+            !$scope.ent.time_start ||
+            !$scope.ent.time_stop) {
+          alert("fill in all fields");
+          return;
+        }
+        ent.date_start = combine_date_time(
+          $scope.ent.date_start, $scope.ent.time_start);
+        ent.date_stop = combine_date_time(
+          $scope.ent.date_stop, $scope.ent.time_stop);
+        ent.act = $scope.act.id;
+        hoodie.store.add(STORE_TYPES.ent, ent)
+          .done(function (ent) {
+            $scope.$apply(function () {
+              $location.path('#/activity/' + $scope.act.id);
+            });
+          })
+          .fail(function (err) { log_throw_err(err); });
+      };
+
+      $scope.loading_act = true;
+      hoodie.store.find(STORE_TYPES.act, $routeParams.act_id)
+        .done(function (act) {
+          $scope.$apply(function () {
+            $scope.act = act;
+            $scope.loading_act = false;
+          });
+        })
+        .fail(function (err) { log_throw_err(err); });
+
+    }]);
+
 
 });

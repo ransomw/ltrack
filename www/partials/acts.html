@@ -1,0 +1,15 @@
+<section class="acts">
+  <div class="row" ng-hide="loading">
+    <div class="four columns">&nbsp</div>
+    <div class="four columns">
+      <ul>
+        <li ng-repeat="act in acts">
+          <a href="#/activity/{{act.id}}">
+            {{act.name}}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="four columns">&nbsp</div>
+  </div>
+</section>

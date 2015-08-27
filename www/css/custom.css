@@ -2,12 +2,40 @@ body {
     margin-bottom: 30px;
 }
 
-nav {
-    text-align: center;
+a {
+    text-decoration: none;
 }
 
 section.curr-entry .row {
     text-align: center;
+}
+
+nav {
+    text-align: center;
+    border-top: solid 1px;
+    border-bottom: solid 1px;
+    border-color: gray;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+
+nav .brand {
+    font-size: 28px;
+    color: black;
+}
+
+nav ul.locations a {
+    color: black;
+}
+
+nav ul {
+    list-style: none;
+    margin-bottom: 0;
+}
+
+nav li {
+    margin-bottom: 0;
 }
 
 @media (min-width: 750px) {
@@ -47,25 +75,15 @@ section.curr-entry .row {
 
 }
 
-a {
-    text-decoration: none;
-}
-
-nav .brand {
-    font-size: 28px;
-    color: black;
-}
-
-nav ul.locations a {
-    color: black;
-}
-
-nav {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    overflow: hidden;
-}
-
-nav ul {
+section.acts li {
     list-style: none;
+}
+
+section.act {
+    text-align: center;
+}
+
+section.act table {
+    margin-left: auto;
+    margin-right: auto;
 }
