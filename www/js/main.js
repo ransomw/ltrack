@@ -17,7 +17,8 @@ require.config({
 	},
 	priority: [
 		"angular"
-	]
+	],
+  waitSeconds: 10
 });
 
 window.name = "NG_DEFER_BOOTSTRAP!";
@@ -62,7 +63,7 @@ require([
        }]);
 
     angular.bootstrap(document, [CONST.APP_NAME]);
-
+    document.getElementById('visible-content').hidden = false;
   });
 
 });

@@ -1,9 +1,8 @@
-<h1>Hiya</h1>
-
 <section ng-hide="logged_in()">
   <div class="row">
     <div class="three columns">&nbsp</div>
     <div class="six columns">
+      <h3>Sign up</h3>
       <form name="signupForm" novalidate>
         <div>
           <label for="username">Username</label>
@@ -39,20 +38,29 @@
   <div class="row">
     <div class="four columns">&nbsp</div>
     <div class="four columns">
-      <form name="entForm" novalidate>
-        <label for="act">Activity type</label>
-        <select name="act" id="act"
-                ng-model="ent.act">
-          <option ng-repeat="act in acts"
-                  val="{{act.id}}">
-            {{act.name}}
-          </option>
-        <button ng-click="addEnt(entForm)"
-                ng-disabled="loading"
-                class="btn">
-          Submit
-        </button>
-      </form>
+      <div ng-show="acts">
+        <h3>What's up?</h3>
+        <form name="entForm" novalidate>
+          <label for="act">Activity type</label>
+          <select name="act" id="act"
+                  ng-model="ent.act">
+            <option ng-repeat="act in acts"
+                    value="{{act.id}}">
+              {{act.name}}
+            </option>
+          </select>
+          <button ng-click="addEnt(entForm)"
+                  ng-disabled="loading"
+                  class="btn">
+            Submit
+          </button>
+        </form>
+      </div>
+      <div ng-hide="acts">
+        <a href="#/activity/new">
+          <h4>What do you like to do?</h4>
+        </a>
+      </div>
     </div>
     <div class="four columns">&nbsp</div>
   </div>

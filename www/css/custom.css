@@ -1,3 +1,71 @@
-nav li {
+body {
+    margin-bottom: 30px;
+}
+
+nav {
+    text-align: center;
+}
+
+section.curr-entry .row {
+    text-align: center;
+}
+
+@media (min-width: 750px) {
+    nav {
+        text-align: left;
+        margin-left: 10%;
+        margin-right: 10%;
+    }
+
+    nav .brand {
+        position: relative;
+        float: left;
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+
+    nav .locations {
+        position: relative;
+        float: left;
+        margin-bottom: 0;
+    }
+
+    nav .locations li {
+        position: relative;
+        float: left;
+        margin-bottom: 0;
+        margin-right: 1em;
+    }
+
+    nav .locations li a {
+        line-height: 3em;
+    }
+
+    nav ul.actions {
+        float: right;
+    }
+
+}
+
+a {
+    text-decoration: none;
+}
+
+nav .brand {
+    font-size: 28px;
+    color: black;
+}
+
+nav ul.locations a {
+    color: black;
+}
+
+nav {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+
+nav ul {
     list-style: none;
 }

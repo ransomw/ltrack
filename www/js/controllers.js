@@ -6,7 +6,7 @@ define([
 ], function (angular, CONST, Hoodie, _) {
 
   /*
-   activity:  name, type
+   activity:  name, atype
    ent: act (activity id), and for according to activity types
       - points: date_start, date_stop
    curr_ent: act (act id), act_name (for convenience)
@@ -44,19 +44,25 @@ define([
       $scope.loading = true;
       var update_ctrl_state = function () {
         $scope.loading = true;
-        hoodie.findAll(STORE_TYPES.curr_ent)
+        hoodie.store.findAll(STORE_TYPES.curr_ent)
           .done(function (curr_ents) {
             if (curr_ents.length === 1) {
-              $scope.curr_ent = curr_ents[0];
+              $scope.$apply(function () {
+                $scope.curr_ent = curr_ents[0];
+              });
             } else if (curr_ents.length === 0) {
-              $scope.curr_ent = undefined;
+              $scope.$apply(function () {
+                $scope.curr_ent = undefined;
+              });
             } else if (curr_ents.length !== 0) {
               $scope.loading = false;
               throw new Error(
                 "programming error: current entries should " +
                   "contain at most one element at any time");
             }
-            $scope.loading = false;
+            $scope.$apply(function () {
+              $scope.loading = false;
+            });
           })
           .fail(function (err) {
             console.log("hoodie.store call failed to find current entry");
@@ -125,11 +131,14 @@ define([
       } else {
         hoodie.store.findAll(STORE_TYPES.act)
           .done(function (acts) {
-            $scope.acts = acts;
+            $scope.$apply(function () {
+              $scope.acts = acts;
+            });
             $scope.loading = false;
           })
-          .error(function (err) {
-            console.log("looking up all activities for home ctrl failed");
+          .fail(function (err) {
+            console.log(
+              "looking up all activities for home ctrl failed");
             console.log(err);
             throw new Error(
               "looking up all activities for home ctrl failed");
@@ -165,9 +174,9 @@ define([
         var ent;
         $scope.loading = true;
         act = $scope.acts.filter(function (act) {
-          return act.id === $scope.act.id;
+          return act.id === $scope.ent.act;
         })[0];
-        if (act.type === ACT_TYPES.point) {
+        if (act.atype === ACT_TYPES.point) {
           ent = _.cloneDeep($scope.ent);
           ent.date = new Date();
           hoodie.store.add(STORE_TYPES.ent, ent)
@@ -181,7 +190,7 @@ define([
               alert("entry store error");
               $scope.loading = false;
             });
-        } else if (act.type === ACT_TYPES.interval) {
+        } else if (act.atype === ACT_TYPES.interval) {
           ent = _.cloneDeep($scope.ent);
           ent.date = new Date();
           ent.act_name = act.name; // convenience
@@ -265,6 +274,7 @@ define([
         });
     }]);
 
+  // todo: prevent activities with the same name
   controllers.controller('ActAddCtrl', [
     '$scope', '$location',
     function LogoutCtrl($scope, $location) {
@@ -275,7 +285,9 @@ define([
         $scope.loading = true;
         // hoodie sets id attribute automatically
         hoodie.store.add(STORE_TYPES.act, $scope.act)
-          .done(function () {
+          .done(function (act) {
+            console.log("added activity");
+            console.log(act);
             $scope.$apply(function () {
               $location.path('/');
             });
