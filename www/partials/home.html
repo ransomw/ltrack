@@ -41,19 +41,26 @@
       <div ng-show="acts && acts.length !== 0">
         <h3>What's up?</h3>
         <form name="entForm" novalidate>
-          <label for="act">Activity type</label>
-          <select name="act" id="act"
-                  ng-model="ent.act">
-            <option ng-repeat="act in acts"
-                    value="{{act.id}}">
-              {{act.name}}
-            </option>
-          </select>
-          <button ng-click="addEnt(entForm)"
-                  ng-disabled="loading"
-                  class="btn">
-            Submit
-          </button>
+          <div>
+            <label for="act">Activity type</label>
+            <select name="act" id="act"
+                    ng-model="ent.act">
+              <option ng-repeat="act in acts"
+                      value="{{act.id}}">
+                {{act.name}}
+              </option>
+            </select>
+            <button ng-click="addEnt(entForm)"
+                    ng-disabled="loading"
+                    class="btn">
+              Go!
+            </button>
+          </div>
+          <div ng-show="currActIsPt()">
+            <label for="note">Note</label>
+            <input type="text"
+                   ng-model="ent.note"></input>
+          </div>
         </form>
       </div>
       <div ng-hide="acts && acts.length !== 0">

@@ -134,6 +134,12 @@ define([
   controllers.controller('HomeCtrl', [
     '$scope',
     function HomeCtrl($scope) {
+      var get_curr_act = function () {
+        return $scope.acts.filter(function (act) {
+          return act.id === $scope.ent.act;
+        })[0];
+      };
+
       $scope.logged_in = logged_in;
       $scope.loading = true;
       if (!logged_in()) {
@@ -143,6 +149,10 @@ define([
           .done(function (acts) {
             $scope.$apply(function () {
               $scope.acts = acts;
+              // prevent undefined option from appearing
+              if ($scope.acts.length !== 0) {
+                $scope.ent = {act: $scope.acts[0].id};
+              }
               $scope.loading = false;
             });
           })
@@ -179,13 +189,15 @@ define([
           });
       };
 
+      $scope.currActIsPt = function () {
+        return get_curr_act().atype === ACT_TYPES.point;
+      };
+
       $scope.addEnt = function (entForm) {
         var act;
         var ent;
         $scope.loading = true;
-        act = $scope.acts.filter(function (act) {
-          return act.id === $scope.ent.act;
-        })[0];
+        act = get_curr_act();
         if (act.atype === ACT_TYPES.point) {
           ent = _.cloneDeep($scope.ent);
           ent.date = new Date();
@@ -286,11 +298,20 @@ define([
   // todo: prevent activities with the same name
   controllers.controller('ActAddCtrl', [
     '$scope', '$location',
-    function LogoutCtrl($scope, $location) {
-      $scope.ACT_TYPES = _.cloneDeep(ACT_TYPES);
+    function ActAddCtrl($scope, $location) {
+      $scope.ACT_TYPES = [
+        { value: ACT_TYPES.point,
+          name: "Point in time"},
+        { value: ACT_TYPES.interval,
+          name: "Time interval"}
+      ];
+
       $scope.loading = false;
 
+      $scope.act = {atype: $scope.ACT_TYPES[0].value};
+
       $scope.addAct = function (actForm) {
+        // todo: prevent duplicate activity names
         $scope.loading = true;
         // hoodie sets id attribute automatically
         hoodie.store.add(STORE_TYPES.act, $scope.act)

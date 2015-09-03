@@ -24,6 +24,24 @@
           </tr>
         </tbody>
       </table>
+      <table ng-show="act.atype === ACT_TYPES.point">
+        <thead>
+          <tr>
+            <th>time</th>
+            <th>note</th>
+            <th>delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="ent in ents">
+            <td>{{dateStr(ent.date)}}</td>
+            <td>{{ent.note}}</td>
+            <td>
+              <button ng-click="delEnt(ent)">X</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <a href="#/entry/new/{{act.id}}"
          class="button"
          ng-show="act.atype === ACT_TYPES.interval">

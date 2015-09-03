@@ -10,11 +10,12 @@
                placeholder="Enter activity name">
       </div>
       <div>
-        <label for="type">Type</label>
-        <select type="select" name="type" id="type"
+        <label for="atype">Type</label>
+        <select type="select" name="atype" id="atype"
                 ng-model="act.atype">
-          <option value="{{ACT_TYPES.interval}}">
-            Time interval
+          <option ng-repeat="atype in ACT_TYPES"
+                  value="{{atype.value}}">
+            {{atype.name}}
           </option>
           <!-- <option value="{{ACT_TYPES.point}}"> -->
           <!--   Point in time -->
