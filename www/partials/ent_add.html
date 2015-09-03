@@ -5,31 +5,57 @@
     <div class="six columns">
       <h3>Manual {{act.name}} entry</h3>
       <h5>using the homepage is suggested</h5>
-      <form name="actForm" novalidate>
+      <form name="ientForm"
+            novalidate
+            ng-show="act.atype === ACT_TYPES.interval">
         <div>
           <label for="date-start">Start date</label>
           <input type="date" name="date-start" id="date-start"
-                 ng-model="ent.date_start">
+                 ng-model="ient.date_start">
         </div>
         <div>
           <label for="time-start">Start time</label>
           <input type="time" name="time-start" id="time-start"
-                 ng-model="ent.time_start">
+                 ng-model="ient.time_start">
         </div>
         <div>
           <label for="date-stop">Stop date</label>
           <input type="date" name="date-stop" id="date-stop"
-                 ng-model="ent.date_stop">
+                 ng-model="ient.date_stop">
         </div>
         <div>
           <label for="time-stop">Stop time</label>
           <input type="time" name="time-stop" id="time-stop"
-                 ng-model="ent.time_stop">
+                 ng-model="ient.time_stop">
         </div>
-        <button ng-click="addAct(actForm)"
+        <button ng-click="addIEnt(ientForm)"
                 ng-disabled="submitted || loading_act"
                 class="btn">
-          Submit
+          Add
+        </button>
+      </form>
+      <form name="pentForm"
+            novalidate
+            ng-show="act.atype === ACT_TYPES.point">
+        <div>
+          <label for="date">Date</label>
+          <input type="date" name="date" id="date"
+                 ng-model="pent.date">
+        </div>
+        <div>
+          <label for="time">Time</label>
+          <input type="time" name="time" id="time"
+                 ng-model="pent.time">
+        </div>
+        <div>
+          <label for="note">Note</label>
+          <input type="text" name="note" id="note"
+                 ng-model="pent.note">
+        </div>
+        <button ng-click="addPEnt(pentForm)"
+                ng-disabled="submitted || loading_act"
+                class="btn">
+          Add
         </button>
       </form>
     </div>

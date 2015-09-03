@@ -441,28 +441,60 @@ define([
                         time.getSeconds());
       };
 
-      $scope.ent = {};
-      $scope.ent.date_start = now;
-      $scope.ent.date_stop = now;
-      $scope.ent.time_start = now;
-      $scope.ent.time_stop = now;
+      $scope.ACT_TYPES = _.cloneDeep(ACT_TYPES);
 
-      $scope.addAct = function (actForm) {
+      // interval entry
+      $scope.ient = {};
+      $scope.ient.date_start = now;
+      $scope.ient.date_stop = now;
+      $scope.ient.time_start = now;
+      $scope.ient.time_stop = now;
+      // point entry
+      $scope.pent = {};
+      $scope.pent.date = now;
+      $scope.pent.time = now;
+
+      // todo: abstract entry storage and use the abstraction
+      //       here and in HomeCtrl
+      $scope.addIEnt = function (ientForm) {
         $scope.submitted = true;
         var ent = {};
-        if (!$scope.ent ||
-            !$scope.ent.date_start ||
-            !$scope.ent.date_stop ||
-            !$scope.ent.time_start ||
-            !$scope.ent.time_stop) {
+        if (!$scope.ient ||
+            !$scope.ient.date_start ||
+            !$scope.ient.date_stop ||
+            !$scope.ient.time_start ||
+            !$scope.ient.time_stop) {
           alert("fill in all fields");
           return;
         }
         ent.date_start = combine_date_time(
-          $scope.ent.date_start, $scope.ent.time_start);
+          $scope.ient.date_start, $scope.ient.time_start);
         ent.date_stop = combine_date_time(
-          $scope.ent.date_stop, $scope.ent.time_stop);
+          $scope.ient.date_stop, $scope.ient.time_stop);
         ent.act = $scope.act.id;
+        hoodie.store.add(STORE_TYPES.ent, ent)
+          .done(function (ent) {
+            $scope.$apply(function () {
+              $location.path('#/activity/' + $scope.act.id);
+            });
+          })
+          .fail(function (err) { log_throw_err(err); });
+      };
+
+
+      $scope.addPEnt = function (pentForm) {
+        $scope.submitted = true;
+        var ent = {};
+        if (!$scope.pent ||
+            !$scope.pent.date ||
+            !$scope.pent.time) {
+          alert("fill in date and time fields");
+          return;
+        }
+        ent.date = combine_date_time(
+          $scope.pent.date, $scope.pent.time);
+        ent.act = $scope.act.id;
+        ent.note = $scope.pent.note || "";
         hoodie.store.add(STORE_TYPES.ent, ent)
           .done(function (ent) {
             $scope.$apply(function () {
