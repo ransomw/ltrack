@@ -1,0 +1,35 @@
+<section class="ents"
+         ng-hide="loading.acts || loading.ents">
+  <div class="row">
+    <div class="two columns">&nbsp</div>
+    <div class="eight columns">
+      <h3>All entries</h3>
+      <div>
+        <div ng-repeat="act in acts">
+          <input type="checkbox"
+                 ng-model="act.display"/>
+          {{act.name}}
+        </div>
+      </div>
+
+      <table>
+        <tbody ng-repeat="ent in fsEnts(ents)">
+          <tr ng-show="getAct(ent).atype === ACT_TYPES.interval">
+            <td>{{getAct(ent).name}}</td>
+            <td>{{dateStr(ent.date_start)}}</td>
+            <td>{{dateStr(ent.date_stop)}}</td>
+            <td>{{dateDiffStr(ent.date_start, ent.date_stop)}}</td>
+          </tr>
+          <tr ng-show="getAct(ent).atype === ACT_TYPES.point">
+            <td>{{getAct(ent).name}}</td>
+            <td>{{dateStr(ent.date)}}</td>
+            <td>&nbsp</td>
+            <td>{{ent.note}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+    <div class="two columns">&nbsp</div>
+  </div>
+</section>

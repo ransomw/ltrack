@@ -69,6 +69,15 @@ section.act table {
     margin-right: auto;
 }
 
+section.ents h3 {
+    text-align: center;
+}
+
+section.ents table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 nav .brand {
     margin-bottom: .5em;
 }

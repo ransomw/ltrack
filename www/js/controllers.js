@@ -44,6 +44,46 @@ define([
     return false;
   };
 
+  var date_str = function (date) {
+    var m;
+    if (!date) {
+      return "";
+    }
+    m = moment(date);
+    return m.format(
+      'MMM D H:mm'
+    );
+  };
+
+  var date_diff_str = function (start, end) {
+    var sec = Math.floor((end - start)/1000);
+    var min = Math.floor(sec/60);
+    var hr;
+    start = new Date(start);
+    end = new Date(end);
+    sec = Math.floor((end - start)/1000);
+    min = Math.floor(sec/60);
+    if (min < 60) {
+      return min + "min";
+    }
+    hr = min/60;
+    return hr.toFixed(1) + "hr";
+  };
+
+  var cmp_ents = function (ent1, ent2) {
+    var date1, date2;
+    if (ent1.date_start) {
+      date1 = new Date(ent1.date_start);
+    } else {
+      date1 = new Date(ent1.date);
+    }
+    if (ent2.date_start) {
+      date2 = new Date(ent2.date_start);
+    } else {
+      date2 = new Date(ent2.date);
+    }
+    return date2 - date1;
+  };
 
   var controllers = angular.module(
     CONST.APP_NAME+'.controllers', []);
@@ -341,10 +381,8 @@ define([
           });
         })
         .fail(function (err) {
-          console.log(
-            "looking up all activities for home ctrl failed");
-          console.log(err);
-          throw new Error(
+          log_throw_err(
+            err,
             "looking up all activities for home ctrl failed");
         });
       }]);
@@ -360,17 +398,7 @@ define([
             $scope.$apply(function () {
               $scope.ents = ents.filter(function (ent) {
                 return ent.act === $routeParams.id;
-              }).sort(function (ent1, ent2) {
-                var date1, date2;
-                if (ent1.date_start) {
-                  date1 = new Date(ent1.date_start);
-                  date2 = new Date(ent2.date_start);
-                } else {
-                  date1 = new Date(ent1.date);
-                  date2 = new Date(ent2.date);
-                }
-                return date1 - date2;
-              });
+              }).sort(cmp_ents);
               $scope.loading_ents = false;
             });
           })
@@ -381,31 +409,8 @@ define([
       $scope.loading_ents = true;
       $scope.ACT_TYPES = _.cloneDeep(ACT_TYPES);
 
-      $scope.dateStr = function (date) {
-        var m;
-        if (!date) {
-          return "";
-        }
-        m = moment(date);
-        return m.format(
-          'MMM D H:mm'
-        );
-      };
-
-      $scope.dateDiffStr = function (start, end) {
-        var sec = Math.floor((end - start)/1000);
-        var min = Math.floor(sec/60);
-        var hr;
-        start = new Date(start);
-        end = new Date(end);
-        sec = Math.floor((end - start)/1000);
-        min = Math.floor(sec/60);
-        if (min < 60) {
-          return min + "min";
-        }
-        hr = min/60;
-        return hr.toFixed(1) + "hr";
-      };
+      $scope.dateStr = date_str;
+      $scope.dateDiffStr = date_diff_str;
 
       $scope.delEnt = function (ent) {
         hoodie.store.remove(STORE_TYPES.ent, ent.id)
@@ -516,5 +521,97 @@ define([
 
     }]);
 
+  controllers.controller('AllEntsCtrl', [
+    '$scope',
+    function AllEntsCtrl($scope) {
+
+      var store_type_to_scope = function (st_type, sc_var) {
+        hoodie.store.findAll(st_type)
+          .done(function (all_res) {
+            $scope.$apply(function () {
+              $scope[sc_var] = all_res;
+              $scope.loading[sc_var] = false;
+            });
+          })
+          .fail(function (err) {
+            log_throw_err(
+              err,
+              "looking up all" + st_type + "for AllEntsCtrl failed");
+          });
+      };
+
+      // $scope.acts = {};
+      // $scope.ents = {};
+      $scope.dateStr = date_str;
+      $scope.dateDiffStr = date_diff_str;
+      $scope.ACT_TYPES = _.cloneDeep(ACT_TYPES);
+
+      $scope.loading = {
+        acts: true,
+        ents: true
+      };
+
+      $scope.getAct = function (ent) {
+        if (!ent || !$scope.acts) {
+          return undefined;
+        }
+        var act = $scope.acts.filter(function (act) {
+          return act.id === ent.act;
+        })[0];
+        if (act) {
+          return act;
+        };
+        return undefined;
+      };
+
+      // filter and sort
+      $scope.fsEnts = function (ents) {
+        var ent_filter = function (ent) {
+          var act = $scope.getAct(ent);
+          return act.display;
+        };
+
+        return ents
+          .filter(ent_filter)
+          .sort(cmp_ents);
+      };
+
+      store_type_to_scope(STORE_TYPES.ent, 'ents');
+
+      hoodie.store.findAll(STORE_TYPES.act)
+        .done(function (all_acts) {
+          $scope.$apply(function () {
+            $scope.acts = all_acts.map(function (act) {
+              act.display = true;
+              return act;
+            });
+            $scope.loading.acts = false;
+          });
+        })
+        .fail(function (err) {
+          log_throw_err(
+            err,
+            "looking up all" + STORE_TYPES.act +
+              "for AllEntsCtrl failed");
+        });
+
+      hoodie.store.findAll(STORE_TYPES.ent)
+        .done(function (all_res) {
+          $scope.$apply(function () {
+            $scope.ents = all_res;
+            console.log("*** got entries:");
+            console.log($scope.ents);
+            $scope.loading.ents = false;
+          });
+        })
+        .fail(function (err) {
+          log_throw_err(
+            err,
+            "looking up all" + STORE_TYPES.ent +
+              "for AllEntsCtrl failed");
+        });
+
+
+    }]);
 
 });

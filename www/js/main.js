@@ -70,6 +70,10 @@ require([
              templateUrl: CONST.PARTIAL_BASE + 'ent_add.html',
              controller: 'EntAddCtrl'
            })
+           .when('/agg/ents', {
+             templateUrl: CONST.PARTIAL_BASE + 'ents.html',
+             controller: 'AllEntsCtrl'
+           })
            .otherwise({
              redirectTo: '/'
            });
