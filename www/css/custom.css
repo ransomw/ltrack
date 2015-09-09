@@ -78,6 +78,16 @@ section.ents table {
     margin-right: auto;
 }
 
+
+section.per {
+    text-align: center;
+}
+
+section.per table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 nav .brand {
     margin-bottom: .5em;
 }

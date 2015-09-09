@@ -55,6 +55,19 @@ define([
     );
   };
 
+  var ms_to_str = function(n_ms) {
+    var sec;
+    var min;
+    var hr;
+    sec = Math.floor(n_ms/1000);
+    min = Math.floor(sec/60);
+    if (min < 60) {
+      return min + "min";
+    }
+    hr = min/60;
+    return hr.toFixed(1) + "hr";
+  };
+
   var date_diff_str = function (start, end) {
     var sec = Math.floor((end - start)/1000);
     var min = Math.floor(sec/60);
@@ -83,6 +96,31 @@ define([
       date2 = new Date(ent2.date);
     }
     return date2 - date1;
+  };
+
+  // int_ = {start: X, end: Y}, where X and Y support comparison
+  // returns the intersection of the two intervals
+  // or null if they don't intersect
+  var intersection = function (int1, int2) {
+    var start, end;
+    if (int1.start >= int1.end ||
+        int2.start >= int2.end) {
+      throw new Error("got invalid interval");
+    }
+    if (int2.start < int1.start) {
+      return intersection(int2, int1);
+    } else {
+      if (int2.start > int1.end) {
+        return null;
+      }
+      start = int2.start; // >= int1.start
+      if (int2.end < int1.end) {
+        end = int2.end;
+      } else {
+        end = int1.end;
+      }
+      return {start: start, end: end};
+    }
   };
 
   var controllers = angular.module(
@@ -230,7 +268,8 @@ define([
       };
 
       $scope.currActIsPt = function () {
-        return get_curr_act().atype === ACT_TYPES.point;
+        var curr_act = get_curr_act();
+        return curr_act && curr_act.atype === ACT_TYPES.point;
       };
 
       $scope.addEnt = function (entForm) {
@@ -525,23 +564,6 @@ define([
     '$scope',
     function AllEntsCtrl($scope) {
 
-      var store_type_to_scope = function (st_type, sc_var) {
-        hoodie.store.findAll(st_type)
-          .done(function (all_res) {
-            $scope.$apply(function () {
-              $scope[sc_var] = all_res;
-              $scope.loading[sc_var] = false;
-            });
-          })
-          .fail(function (err) {
-            log_throw_err(
-              err,
-              "looking up all" + st_type + "for AllEntsCtrl failed");
-          });
-      };
-
-      // $scope.acts = {};
-      // $scope.ents = {};
       $scope.dateStr = date_str;
       $scope.dateDiffStr = date_diff_str;
       $scope.ACT_TYPES = _.cloneDeep(ACT_TYPES);
@@ -576,8 +598,6 @@ define([
           .sort(cmp_ents);
       };
 
-      store_type_to_scope(STORE_TYPES.ent, 'ents');
-
       hoodie.store.findAll(STORE_TYPES.act)
         .done(function (all_acts) {
           $scope.$apply(function () {
@@ -596,11 +616,9 @@ define([
         });
 
       hoodie.store.findAll(STORE_TYPES.ent)
-        .done(function (all_res) {
+        .done(function (all_ents) {
           $scope.$apply(function () {
-            $scope.ents = all_res;
-            console.log("*** got entries:");
-            console.log($scope.ents);
+            $scope.ents = all_ents;
             $scope.loading.ents = false;
           });
         })
@@ -611,6 +629,162 @@ define([
               "for AllEntsCtrl failed");
         });
 
+
+    }]);
+
+  // Percentage time use
+  controllers.controller('PerCtrl', [
+    '$scope',
+    function PerCtrl($scope) {
+
+      var INT_END = moment();
+      var INT_START_DAY = moment(INT_END).subtract(1, 'days');
+      var INT_START_DAY3 = moment(INT_END).subtract(3, 'days');
+      var INT_START_WEEK = moment(INT_END).subtract(7, 'days');
+      var RET_OBJ = [];
+
+      var ent_2_mo_int = function (ent) {
+        return {
+          start: moment(ent.date_start),
+          end: moment(ent.date_stop)
+        };
+      };
+
+      var make_intersection = function (int1) {
+        return function (int2) {
+          return intersection(int1, int2);
+        };
+      };
+
+      var mo_int_2_ms = function (inter) {
+        if (inter === null) {
+          return 0;
+        }
+        if (inter.start >= inter.end) {
+          throw new Error("got invalid interval");
+        }
+        return inter.end - inter.start;
+      };
+
+      var acts = [];
+      var ents = [];
+
+      var INT_TYPES = {
+        day: "Past 24hr",
+        days3: "Past 3 days",
+        week: "Past week",
+        custom: "Custom time range"
+      };
+
+      $scope.INT_TYPES = [
+        'day',
+        'days3',
+        'week'
+      ].map(function (t_name) {
+        return {
+          name: INT_TYPES[t_name],
+          value: t_name
+        };
+      });
+
+      $scope.loading = {
+        acts: true,
+        ents: true
+      };
+
+      $scope.int_type = 'day';
+
+      hoodie.store.findAll(STORE_TYPES.act)
+        .done(function (all_acts) {
+          $scope.$apply(function () {
+            acts = all_acts.filter(function (act) {
+              return act.atype === ACT_TYPES.interval;
+            });
+            $scope.loading.acts = false;
+          });
+        })
+        .fail(function (err) {
+          log_throw_err(
+            err,
+            "looking up all" + STORE_TYPES.act +
+              "for AllEntsCtrl failed");
+        });
+
+      hoodie.store.findAll(STORE_TYPES.ent)
+        .done(function (all_ents) {
+          $scope.$apply(function () {
+            ents = all_ents;
+            $scope.loading.ents = false;
+          });
+        })
+        .fail(function (err) {
+          log_throw_err(
+            err,
+            "looking up all" + STORE_TYPES.ent +
+              "for AllEntsCtrl failed");
+        });
+
+      $scope.perUse = function () {
+        var make_entry = function (etype, etime) {
+          return {
+            type: etype,
+            time: etime,
+            per: Math.floor(100*(etime/(int_end-int_start)))
+          };
+        };
+        var int_end = INT_END;
+        var int_start;
+        var ret_obj;
+        var untracked_time;
+        if ($scope.loading.acts || $scope.loading.ents) {
+          ret_obj = [];
+        } else {
+          if ($scope.int_type === 'day') {
+            int_start = INT_START_DAY;
+          } else if ($scope.int_type === 'days3') {
+            int_start = INT_START_DAY3;
+          } else if ($scope.int_type === 'week') {
+            int_start = INT_START_WEEK;
+          } else {
+            throw new Error("unspecified interval type");
+          }
+          ret_obj = acts.map(function (act) {
+            var act_ents = ents.filter(function (ent) {
+              return ent.act === act.id;
+            });
+            if (act_ents.length > 0) {
+              console.log(act_ents);
+            }
+            var act_time = act_ents
+                  .map(ent_2_mo_int)
+                  .map(make_intersection({
+                    start: int_start, end: int_end
+                  }))
+                  .map(mo_int_2_ms)
+                  .reduce(function(a, b) {return a + b;}, 0);
+            return make_entry(act.name, act_time);
+          });
+          untracked_time = (int_end - int_start) -
+            ret_obj.map(function (entry) {
+              return entry.time;
+            }).reduce(function(a, b) {return a + b;}, 0);
+          // todo: ensure activity cannot be named 'untracked'
+          ret_obj.push(make_entry('untracked', untracked_time));
+          ret_obj.sort(function (ent1, ent2) {
+            return ent2.per - ent1.per;
+          });
+          ret_obj.forEach(function (rent) {
+            rent.time = ms_to_str(rent.time);
+          });
+          ret_obj = ret_obj.filter(function (rent) {
+            return rent.per !== 0;
+          });
+        }
+        if (!_.isEqual(ret_obj, RET_OBJ)) {
+          RET_OBJ = ret_obj;
+        }
+        return RET_OBJ;
+      };
 
     }]);
 

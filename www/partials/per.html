@@ -1,0 +1,36 @@
+<section class="per"
+         ng-hide="loading.acts || loading.ents">
+  <div class="row">
+    <div class="two columns">&nbsp</div>
+    <div class="eight columns">
+      <h3>Time use</h3>
+      <div>
+        <select ng-model="int_type">
+          <option ng-repeat="itype in INT_TYPES"
+                  value="{{itype.value}}">
+            {{itype.name}}
+          </option>
+        </select>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>activity</th>
+            <th>time</th>
+            <th>percentage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="ent in perUse() track by ent.type">
+            <td>{{ent.type}}</td>
+            <td>{{ent.time}}</td>
+            <td>{{ent.per}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+    <div class="two columns">&nbsp</div>
+  </div>
+</section>

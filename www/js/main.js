@@ -74,6 +74,10 @@ require([
              templateUrl: CONST.PARTIAL_BASE + 'ents.html',
              controller: 'AllEntsCtrl'
            })
+           .when('/agg/per', {
+             templateUrl: CONST.PARTIAL_BASE + 'per.html',
+             controller: 'PerCtrl'
+           })
            .otherwise({
              redirectTo: '/'
            });
