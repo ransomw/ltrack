@@ -127,9 +127,32 @@ define([
     CONST.APP_NAME+'.controllers', []);
 
   controllers.controller('CurrEntCtrl', [
-    '$scope',
-    function CurrEntCtrl($scope) {
-      $scope.loading = true;
+    '$scope', '$interval',
+    function CurrEntCtrl($scope, $interval) {
+
+      var TIME_STR_UPDATE_INT = 1000 * 60; // ms
+
+      var set_time_str = function () {
+        var now = moment();
+        // prevent digest loop in progress error
+        // todo: examine more about how this works
+        //       and apply the pattern elsewhere if applicable
+        _.defer(function () {
+          $scope.$apply(function () {
+            var start, dur;
+            if (!$scope.curr_ent) {
+              $scope.time_str = '';
+            } else {
+              start = moment($scope.curr_ent.date);
+              dur = moment.duration(now - start);
+              $scope.time_str =
+                ('0' + dur.get('hours')).slice(-2) + " : " +
+                ('0' + dur.get('minutes')).slice(-2);
+            }
+          });
+        });
+      };
+
       var update_ctrl_state = function () {
         $scope.loading = true;
         hoodie.store.findAll(STORE_TYPES.curr_ent)
@@ -138,6 +161,7 @@ define([
               $scope.$apply(function () {
                 $scope.curr_ent = curr_ents[0];
               });
+              set_time_str();
             } else if (curr_ents.length === 0) {
               $scope.$apply(function () {
                 $scope.curr_ent = undefined;
@@ -200,7 +224,11 @@ define([
                       update_ctrl_state);
       hoodie.store.on(STORE_TYPES.curr_ent + ':remove',
                       update_ctrl_state);
+
+      $scope.loading = true;
       update_ctrl_state();
+
+      $interval(set_time_str, TIME_STR_UPDATE_INT);
     }]);
 
   controllers.controller('HeaderCtrl', [
@@ -299,6 +327,7 @@ define([
             .done(function (curr_ents) {
               if (curr_ents.length !== 0) {
                 alert("already engaged in an interval activity");
+                $scope.loading = false;
               } else {
                 hoodie.store.add(STORE_TYPES.curr_ent, ent)
                   .done(function (ent) {
