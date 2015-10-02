@@ -622,9 +622,12 @@ define([
           return act.display;
         };
 
-        return ents
-          .filter(ent_filter)
-          .sort(cmp_ents);
+        if (ents) {
+          return ents
+            .filter(ent_filter)
+            .sort(cmp_ents);
+        }
+        return [];
       };
 
       hoodie.store.findAll(STORE_TYPES.act)
