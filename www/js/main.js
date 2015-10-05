@@ -78,6 +78,10 @@ require([
              templateUrl: CONST.PARTIAL_BASE + 'per.html',
              controller: 'PerCtrl'
            })
+           .when('/pass', {
+             templateUrl: CONST.PARTIAL_BASE + 'pass.html',
+             controller: 'PassCtrl'
+           })
            .otherwise({
              redirectTo: '/'
            });

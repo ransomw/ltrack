@@ -1,0 +1,21 @@
+<div class="row">
+  <div class="three columns">&nbsp</div>
+  <div class="six columns">
+    <h3>Verify password</h3>
+    <h5>to sync local data with server</h5>
+    <form name="loginForm" novalidate>
+      <div>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password"
+               ng-model="login.password"
+               placeholder="Enter password">
+      </div>
+      <button ng-click="loginUser(loginForm)"
+              ng-disabled="loading"
+              class="btn">
+        Submit
+      </button>
+    </form>
+  </div>
+  <div class="three columns">&nbsp</div>
+</div>
