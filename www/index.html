@@ -8,8 +8,18 @@
           href="css/normalize.css">
     <link rel="stylesheet" type="text/css"
           href="css/skeleton.css">
-    <link rel="stylesheet" type="text/css"
-          href="css/custom.css">
+
+    <!-- todo: do not use client-side css compilation in production -->
+    <link rel="stylesheet/less" type="text/css"
+          href="less/main.less">
+
+    <!-- <link rel="stylesheet" type="text/css" -->
+    <!--       href="css/custom.css"> -->
+
+    <script src="js/vendor/bower/less.js/dist/less.min.js"
+            data-env="development">
+    </script>
+
     <script data-main="js/main"
             src="js/vendor/bower/requirejs/require.js">
   </script>
