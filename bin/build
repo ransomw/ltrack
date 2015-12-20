@@ -11,5 +11,5 @@ var argv = require('yargs')
       .argv;
 
 ltrack.build_client(argv.c).then(function () {
-  console.log("built client js and styles");
+  console.log("client build finished");
 });

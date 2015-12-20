@@ -5,6 +5,7 @@ var Q = require('q');
 var watchify = require('watchify');
 var browserify = require('browserify');
 var less = require('less');
+var Handlebars = require('handlebars');
 
 // dest paths
 var PATH_CLIENT_STATIC_DIR = path.join(
@@ -13,13 +14,17 @@ var PATH_CLIENT_BUNDLE = path.join(
   PATH_CLIENT_STATIC_DIR, 'bundle.js');
 var PATH_GEN_STYLES = path.join(
   PATH_CLIENT_STATIC_DIR, 'css');
+var PATH_PAGE_HTML = path.join(
+  PATH_CLIENT_STATIC_DIR, 'index.html');
 // src paths
 var PATH_CLIENT_MAIN = path.join(
   'app', 'main.js');
 var PATH_SRC_STYLES = path.join(
   'styles');
+var PATH_PAGE_TEMPLATE = path.join(
+  'index.hbs');
 
-
+/* bfy: browserify() instance */
 var make_write_bundle = function (bfy, path_bundle) {
   return function () {
     var deferred = Q.defer();
@@ -32,34 +37,41 @@ var make_write_bundle = function (bfy, path_bundle) {
   };
 };
 
+// yea, streams would be better... idk if less and handlebars support?
+var read_file = function (file_path) {
+  var deferred = Q.defer();
+  fs.readFile(file_path, 'utf8', function (err, data) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      deferred.resolve(data);
+    }
+  });
+  return deferred.promise;
+};
+
+var write_file = function (file_path, file_str) {
+  var deferred = Q.defer();
+  fs.writeFile(file_path, file_str, function (err) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      deferred.resolve();
+    }
+  });
+  return deferred.promise;
+};
+
 var build_style = function(filename) {
   var path_src = path.join(PATH_SRC_STYLES, filename);
   var path_dest = path.join(
     PATH_GEN_STYLES,
     path.basename(filename, '.less')) + '.css';
-  return Q().then(function () {
-    var deferred = Q.defer();
-    fs.readFile(path_src, 'utf8', function (err, data) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve(data);
-      }
-    });
-    return deferred.promise;
-  }).then(function (less_input) {
+  return read_file(path_src)
+    .then(function (less_input) {
     return less.render(less_input);
   }).then(function (less_output) {
-    var css = less_output.css;
-    var deferred = Q.defer();
-    fs.writeFile(path_dest, css, function (err) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve();
-      }
-    });
-    return deferred.promise;
+    return write_file(path_dest, less_output.css);
   });
 };
 
@@ -79,17 +91,34 @@ var build_styles_once = function () {
   });
 };
 
-/* cts (boolean): build continuously */
-var build_styles = function (cts) {
-  return build_styles_once().then(function (res) {
-    if (cts) {
-      fs.watch(PATH_SRC_STYLES, function () {
-        build_styles_once();
-      });
-    }
-    return res;
-  });
+var build_html_once = function () {
+  return read_file(PATH_PAGE_TEMPLATE)
+    .then(function (template_str) {
+      var template = Handlebars.compile(template_str);
+      var html_str = template({});
+      return write_file(PATH_PAGE_HTML, html_str);
+    });
 };
+
+// some duplication/fragility here,
+// as watch_path occurs in build_X_once functions
+var make_build_fn = function(build_once_fn, watch_path) {
+  /* cts (boolean): build continuously */
+  return function (cts) {
+    return build_once_fn().then(function (res) {
+      if (cts) {
+        fs.watch(watch_path, function () {
+          build_once_fn();
+        });
+      }
+      return res;
+    });
+  };
+};
+
+
+var build_styles = make_build_fn(build_styles_once, PATH_SRC_STYLES);
+var build_html = make_build_fn(build_html_once, PATH_PAGE_TEMPLATE);
 
 
 var build_client_js = function (cts) {
@@ -109,7 +138,11 @@ var build_client_js = function (cts) {
 
 /* cts (boolean): build continuously */
 module.exports.build_client = function (cts) {
-  return build_styles(cts).then(function () {
-    return build_client_js(cts);
-  });
+  return Q.all([
+    // todo: activate and test this ... after custom directives
+    // (currently, handlebars removes angular {{}}s)
+    // build_html(cts),
+    build_styles(cts),
+    build_client_js(cts)
+  ]);
 };
