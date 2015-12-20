@@ -13,19 +13,14 @@
     <link rel="stylesheet/less" type="text/css"
           href="less/main.less">
 
-    <!-- <link rel="stylesheet" type="text/css" -->
-    <!--       href="css/custom.css"> -->
-
     <script src="js/vendor/bower/less.js/dist/less.min.js"
             data-env="development">
     </script>
-
-    <script data-main="js/main"
-            src="js/vendor/bower/requirejs/require.js">
   </script>
   </head>
   <body id="visible-content" hidden="true">
 
+    <!-- todo: custom directive -->
     <section class="curr-entry"
              ng-controller="CurrEntCtrl">
       <div class="container"
@@ -43,6 +38,7 @@
       </div>
     </section>
 
+    <!-- todo: custom directive -->
     <nav ng-controller="HeaderCtrl">
       <div class="brand">
         <a href="#/">
@@ -83,5 +79,7 @@
       <div ng-view></div>
     </div>
 
+    <script src="bundle.js">
+    </script>
   </body>
 </html>

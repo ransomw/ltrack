@@ -1,0 +1,15 @@
+// -*-js2-*-
+
+var ltrack = require('../index');
+var argv = require('yargs')
+      .options({
+        'c': {
+          desc: "continuous build",
+          type: 'boolean'
+        }
+      })
+      .argv;
+
+ltrack.build_client_js(argv.c).then(function () {
+  console.log("built client js");
+});

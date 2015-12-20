@@ -2,3 +2,5 @@
 node_modules/
 data/
 www/js/vendor/
+www/bundle.js
+app/hoodie.js
