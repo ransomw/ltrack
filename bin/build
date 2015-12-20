@@ -10,6 +10,6 @@ var argv = require('yargs')
       })
       .argv;
 
-ltrack.build_client_js(argv.c).then(function () {
-  console.log("built client js");
+ltrack.build_client(argv.c).then(function () {
+  console.log("built client js and styles");
 });
