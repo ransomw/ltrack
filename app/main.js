@@ -3,7 +3,7 @@ window.name = "NG_DEFER_BOOTSTRAP!";
 var angular = require('angular');
 var CONST = require('./constants');
 require('angular-route');
-require('./controllers');
+require('./controllers_main');
 
 angular.element(document).ready(function () {
   var catalog_app = angular.module(CONST.APP_NAME, [
