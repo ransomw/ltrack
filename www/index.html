@@ -14,60 +14,13 @@
   </head>
   <body id="visible-content" hidden="true">
 
-    <!-- todo: custom directive -->
-    <section class="curr-entry"
-             ng-controller="CurrEntCtrl">
-      <div class="container"
-           ng-hide="loading || !curr_ent">
-        <div class="row">
-          <div class="three columns">&nbsp</div>
-          <div class="six columns">
-            <h3>You are currently {{curr_ent.act_name}}.</h3>
-            <h4>{{time_str}}</h4>
-            <button ng-click="stopEnt()">
-              Done
-            </button>
-          </div>
-          <div class="three columns">&nbsp</div>
-      </div>
-    </section>
+    <div curr-ent>
+      <!-- todo: spinner -->
+    </div>
 
-    <!-- todo: custom directive -->
-    <nav ng-controller="HeaderCtrl">
-      <div class="brand">
-        <a href="#/">
-          ltrack
-        </a>
-      </div>
-      <ul class="locations"
-          ng-show="logged_in()">
-        <li>
-          <a href="#/activity/new">
-            Add Activity
-          </a>
-        </li>
-        <li>
-          <a href="#/activities">
-            View records
-          </a>
-        </li>
-      </ul>
-
-      <ul class="actions">
-        <li ng-hide="logged_in()">
-          <a href="#/login"
-             class="button">
-            Login
-          </a>
-        </li>
-        <li ng-show="logged_in()">
-          <a href="#/logout"
-             class="button">
-            Logout
-          </a>
-        </li>
-      </ul>
-    </nav>
+    <div nav-bar>
+      <!-- todo: spinner -->
+    </div>
 
     <div class="container">
       <div ng-view></div>

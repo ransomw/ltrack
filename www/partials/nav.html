@@ -1,0 +1,35 @@
+<nav>
+  <div class="brand">
+    <a href="#/">
+      ltrack
+    </a>
+  </div>
+  <ul class="locations"
+      ng-show="logged_in()">
+    <li>
+      <a href="#/activity/new">
+        Add Activity
+      </a>
+    </li>
+    <li>
+      <a href="#/activities">
+        View records
+      </a>
+    </li>
+  </ul>
+
+  <ul class="actions">
+    <li ng-hide="logged_in()">
+      <a href="#/login"
+         class="button">
+        Login
+      </a>
+    </li>
+    <li ng-show="logged_in()">
+      <a href="#/logout"
+         class="button">
+        Logout
+      </a>
+    </li>
+  </ul>
+</nav>

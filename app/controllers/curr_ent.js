@@ -5,7 +5,7 @@ var CONST = require('../constants');
 
 module.exports = [
   '$scope', '$interval',
-  function CurrEntCtrl($scope, $interval) {
+  function ($scope, $interval) {
 
     var TIME_STR_UPDATE_INT = 1000 * 60; // ms
 

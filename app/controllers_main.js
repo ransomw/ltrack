@@ -12,11 +12,7 @@ var controllers = require('./controllers');
 var angular_module_controllers = angular.module(
   CONST.APP_NAME+'.controllers', []);
 
-
 angular_module_controllers.controller('PassCtrl', controllers.pass);
-angular_module_controllers
-  .controller('CurrEntCtrl', controllers.curr_ent);
-angular_module_controllers.controller('HeaderCtrl', controllers.header);
 angular_module_controllers.controller('HomeCtrl', controllers.home);
 angular_module_controllers.controller('LoginCtrl', controllers.login);
 angular_module_controllers.controller('LogoutCtrl', controllers.logout);

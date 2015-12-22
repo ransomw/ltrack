@@ -4,14 +4,16 @@ var angular = require('angular');
 var CONST = require('./constants');
 require('angular-route');
 require('./controllers_main');
+require('./directives_main');
 
 angular.element(document).ready(function () {
-  var catalog_app = angular.module(CONST.APP_NAME, [
+  var ltrack_app = angular.module(CONST.APP_NAME, [
     'ngRoute',
-    CONST.APP_NAME + '.controllers'
+    CONST.APP_NAME + '.controllers',
+    CONST.APP_NAME + '.directives'
   ]);
 
-  catalog_app.config(
+  ltrack_app.config(
     ['$routeProvider',
      function($routeProvider) {
        $routeProvider
@@ -63,4 +65,3 @@ angular.element(document).ready(function () {
   angular.bootstrap(document, [CONST.APP_NAME]);
   document.getElementById('visible-content').hidden = false;
 });
-
