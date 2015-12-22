@@ -120,7 +120,6 @@ var make_build_fn = function(build_once_fn, watch_path) {
 var build_styles = make_build_fn(build_styles_once, PATH_SRC_STYLES);
 var build_html = make_build_fn(build_html_once, PATH_PAGE_TEMPLATE);
 
-
 var build_client_js = function (cts) {
   var bfy = browserify({
     entries: [PATH_CLIENT_MAIN],
@@ -139,9 +138,7 @@ var build_client_js = function (cts) {
 /* cts (boolean): build continuously */
 module.exports.build_client = function (cts) {
   return Q.all([
-    // todo: activate and test this ... after custom directives
-    // (currently, handlebars removes angular {{}}s)
-    // build_html(cts),
+    build_html(cts),
     build_styles(cts),
     build_client_js(cts)
   ]);
