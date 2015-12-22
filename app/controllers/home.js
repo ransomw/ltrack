@@ -2,6 +2,7 @@ var _ = require('lodash');
 var CONST = require('../constants');
 var hoodie = require('../hoodie_inst');
 var util = require('../util');
+var routes = require('../routes');
 
 module.exports = [
   '$scope',
@@ -13,6 +14,7 @@ module.exports = [
     };
 
     $scope.logged_in = util.logged_in;
+    $scope.reverse = routes.reverse;
     $scope.loading = true;
     if (!util.logged_in()) {
       $scope.loading = false;

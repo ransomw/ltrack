@@ -98,3 +98,14 @@ module.exports.cmp_ents = function (ent1, ent2) {
   return date2 - date1;
 };
 
+
+
+module.exports.arr_elem = function(arr) {
+  if (!Array.isArray(arr)) {
+    throw new Error("arr_elem expects array argument");
+  }
+  if (arr.length !== 1) {
+    throw new Error("expected exactly one element");
+  }
+  return arr[0];
+};

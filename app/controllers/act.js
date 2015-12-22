@@ -2,6 +2,7 @@ var _ = require('lodash');
 var CONST = require('../constants');
 var hoodie = require('../hoodie_inst');
 var util = require('../util');
+var routes = require('../routes');
 
 module.exports = [
   '$scope', '$routeParams',
@@ -19,6 +20,8 @@ module.exports = [
         })
         .fail(function (err) { util.log_throw_err(err); });
     };
+
+    $scope.reverse = routes.reverse;
 
     $scope.loading_act = true;
     $scope.loading_ents = true;

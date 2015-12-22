@@ -1,18 +1,18 @@
 <nav>
   <div class="brand">
-    <a href="#/">
+      <a href="{{reverse('home')}}">
       ltrack
     </a>
   </div>
   <ul class="locations"
       ng-show="logged_in()">
     <li>
-      <a href="#/activity/new">
+      <a href="{{reverse('act-add')}}">
         Add Activity
       </a>
     </li>
     <li>
-      <a href="#/activities">
+      <a href="{{reverse('acts')}}">
         View records
       </a>
     </li>
@@ -20,13 +20,13 @@
 
   <ul class="actions">
     <li ng-hide="logged_in()">
-      <a href="#/login"
+      <a href="{{reverse('login')}}"
          class="button">
         Login
       </a>
     </li>
     <li ng-show="logged_in()">
-      <a href="#/logout"
+      <a href="{{reverse('logout')}}"
          class="button">
         Logout
       </a>

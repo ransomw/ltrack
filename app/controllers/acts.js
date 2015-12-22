@@ -1,10 +1,12 @@
 var hoodie = require('../hoodie_inst');
 var CONST = require('../constants');
 var util = require('../util');
+var routes = require('../routes');
 
 module.exports = [
   '$scope',
   function ActsCtrl($scope) {
+    $scope.reverse = routes.reverse;
     $scope.loading = true;
     hoodie.store.findAll(CONST.STORE_TYPES.act)
       .done(function (acts) {
