@@ -2,6 +2,12 @@ var CONST = require('../constants');
 var hoodie = require('../hoodie_inst');
 var util = require('./util');
 
+/* add activity */
+var add_act = function (act) {
+  // hoodie sets id attribute automatically
+  return util.conv_p(hoodie.store.add(CONST.STORE_TYPES.act, act));
+};
+
 /* get all activities */
 var get_acts = function () {
   return util.conv_p(hoodie.store.findAll(CONST.STORE_TYPES.act));
@@ -48,6 +54,7 @@ var add_curr_ent = function (ent) {
 
 module.exports = function () {
   return {
+    add_act: add_act,
     get_acts: get_acts,
     get_act: get_act,
     add_ent: add_ent,

@@ -1,11 +1,10 @@
 var _ = require('lodash');
 var CONST = require('../constants');
-var hoodie = require('../hoodie_inst');
 var util = require('../util');
 
 module.exports =[
-  '$scope',
-  function AllEntsCtrl($scope) {
+  '$scope', 'actProvider',
+  function AllEntsCtrl($scope, actP) {
 
     $scope.dateStr = util.date_str;
     $scope.dateDiffStr = util.date_diff_str;
@@ -44,35 +43,39 @@ module.exports =[
       return [];
     };
 
-    hoodie.store.findAll(CONST.STORE_TYPES.act)
-      .done(function (all_acts) {
+    actP.get_acts()
+      .then(function (all_acts) {
         $scope.$apply(function () {
           $scope.acts = all_acts.map(function (act) {
             act.display = true;
             return act;
           });
-          $scope.loading.acts = false;
         });
-      })
-      .fail(function (err) {
+      }, function (err) {
         util.log_throw_err(
           err,
           "looking up all" + CONST.STORE_TYPES.act +
             "for AllEntsCtrl failed");
+      }).finally(function () {
+        _.defer($scope.$apply(function () {
+          $scope.loading.acts = false;
+        }));
       });
 
-    hoodie.store.findAll(CONST.STORE_TYPES.ent)
-      .done(function (all_ents) {
+    actP.get_ents()
+      .then(function (all_ents) {
         $scope.$apply(function () {
           $scope.ents = all_ents;
-          $scope.loading.ents = false;
         });
-      })
-      .fail(function (err) {
+      }, function (err) {
         util.log_throw_err(
           err,
           "looking up all" + CONST.STORE_TYPES.ent +
             "for AllEntsCtrl failed");
+      }).finally(function () {
+        _.defer($scope.$apply(function () {
+          $scope.loading.ents = false;
+        }));
       });
 
-  }]
+  }];
