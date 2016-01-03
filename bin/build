@@ -10,6 +10,8 @@ var argv = require('yargs')
       })
       .argv;
 
+// todo: display error messages on js build (non-existant module)
+//       when continuous build is enabled
 ltrack.build_client(argv.c).then(function () {
   console.log("client build finished");
 });

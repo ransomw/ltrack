@@ -1,7 +1,7 @@
 var angular = require('angular');
 var CONST = require('./constants');
 var controllers = require('./controllers');
-
+require('./services');
 /*
  activity:  name, atype
  ent: act (activity id), and for according to activity types
