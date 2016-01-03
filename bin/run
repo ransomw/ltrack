@@ -1,0 +1,12 @@
+// -*- js2 -*-
+
+var app = require('hoodie-server');
+
+app.start({/*config*/}, function (err) {
+  if (err) {
+    console.log("hoodie server startup error");
+    console.log(err);
+  } else {
+    console.log('');
+  }
+});
