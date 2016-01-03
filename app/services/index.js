@@ -5,3 +5,5 @@ var angular_module_services = angular
 
 angular_module_services
   .factory('actProvider', require('./act'));
+angular_module_services
+  .factory('authProvider', require('./auth'));

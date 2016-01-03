@@ -10,7 +10,9 @@ require('./services');
  */
 
 var angular_module_controllers = angular.module(
-  CONST.APP_NAME+'.controllers', []);
+  CONST.APP_NAME+'.controllers', [
+    CONST.APP_NAME + '.services'
+  ]);
 
 angular_module_controllers.controller('PassCtrl', controllers.pass);
 angular_module_controllers.controller('HomeCtrl', controllers.home);

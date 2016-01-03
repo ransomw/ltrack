@@ -9,3 +9,6 @@ module.exports.ACT_TYPES = {
   interval: 'interval',
   point: 'point'
 };
+module.exports.ACT_P_ERRS = {
+  engaged: 'already engaged in interval activity'
+};

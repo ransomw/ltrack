@@ -1,12 +1,11 @@
 var _ = require('lodash');
 var CONST = require('../constants');
-var hoodie = require('../hoodie_inst');
 var util = require('../util');
 var routes = require('../routes');
 
 module.exports = [
-  '$scope',
-  function HomeCtrl($scope) {
+  '$scope', 'actProvider', 'authProvider',
+  function HomeCtrl($scope, actP, authP) {
     var get_curr_act = function () {
       return $scope.acts.filter(function (act) {
         return act.id === $scope.ent.act;
@@ -19,8 +18,8 @@ module.exports = [
     if (!util.logged_in()) {
       $scope.loading = false;
     } else {
-      hoodie.store.findAll(CONST.STORE_TYPES.act)
-        .done(function (acts) {
+      actP.get_acts()
+        .then(function (acts) {
           $scope.$apply(function () {
             $scope.acts = acts;
             // prevent undefined option from appearing
@@ -29,8 +28,7 @@ module.exports = [
             }
             $scope.loading = false;
           });
-        })
-        .fail(function (err) {
+        }, function (err) {
           console.log(
             "looking up all activities for home ctrl failed");
           console.log(err);
@@ -47,19 +45,20 @@ module.exports = [
         $scope.loading = false;
         return;
       }
-      hoodie.account.signUp(
+      authP.sign_up(
         $scope.signup.username.trim(), $scope.signup.password)
-        .done(function (username) {
+        .then(function (username) {
           // todo: sign in user s.t. views update
           alert("signed up!");
-          $scope.loading = false;
-        })
-        .fail(function (err) {
+        }, function (err) {
           console.log("hoodie sign up error");
           console.log(err);
           // todo: detailed error information
           alert("sign up failed");
-          $scope.loading = false;
+        }).finally(function () {
+          _.defer($scope.$apply(function () {
+            $scope.loading = false;
+          }));
         });
     };
 
@@ -76,45 +75,38 @@ module.exports = [
       if (act.atype === CONST.ACT_TYPES.point) {
         ent = _.cloneDeep($scope.ent);
         ent.date = new Date();
-        hoodie.store.add(CONST.STORE_TYPES.ent, ent)
-          .done(function (ent) {
+        actP.add_ent(ent)
+          .then(function (ent) {
             alert("entry stored");
-            $scope.loading = false;
-          })
-          .fail(function (err) {
+          }, function (err) {
             console.log("entry store error");
             console.log(err);
             alert("entry store error");
-            $scope.loading = false;
+          })
+          .finally(function () {
+            _.defer($scope.$apply(function () {
+              $scope.loading = false;
+            }));
           });
       } else if (act.atype === CONST.ACT_TYPES.interval) {
         ent = _.cloneDeep($scope.ent);
         ent.date = new Date();
         ent.act_name = act.name; // convenience
-        hoodie.store.findAll(CONST.STORE_TYPES.curr_ent)
-          .done(function (curr_ents) {
-            if (curr_ents.length !== 0) {
+        actP.add_curr_ent(ent)
+          .then(function () {
+          }, function (err) {
+            if (err.message === CONST.ACT_P_ERRS.engaged) {
               alert("already engaged in an interval activity");
-              $scope.loading = false;
             } else {
-              hoodie.store.add(CONST.STORE_TYPES.curr_ent, ent)
-                .done(function (ent) {
-                  $scope.loading = false;
-                })
-                .fail(function (err) {
-                  console.log("entry store error");
-                  console.log(err);
-                  alert("entry store error");
-                  $scope.loading = false;
-                });
+              console.log("current entry store error");
+              console.log(err);
+              alert("entry store error");
             }
           })
-          .fail(function (err) {
-            console.log(
-              "hoodie.store call failed to find current entry");
-            console.log(err);
-            throw new Error(
-              "hoodie.store call failed to find current entry");
+          .finally(function () {
+            _.defer($scope.$apply(function () {
+              $scope.loading = false;
+            }));
           });
       } else {
         console.log("unknown activity type");
