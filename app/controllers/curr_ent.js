@@ -1,11 +1,10 @@
 var _ = require('lodash');
 var moment = require('moment');
-var hoodie = require('../hoodie_inst');
 var CONST = require('../constants');
 
 module.exports = [
-  '$scope', '$interval',
-  function ($scope, $interval) {
+  '$scope', '$interval', 'actProvider',
+  function ($scope, $interval, actP) {
 
     var TIME_STR_UPDATE_INT = 1000 * 60; // ms
 
@@ -32,78 +31,63 @@ module.exports = [
 
     var update_ctrl_state = function () {
       $scope.loading = true;
-      hoodie.store.findAll(CONST.STORE_TYPES.curr_ent)
-        .done(function (curr_ents) {
-          if (curr_ents.length === 1) {
-            $scope.$apply(function () {
-              $scope.curr_ent = curr_ents[0];
-            });
-            set_time_str();
-          } else if (curr_ents.length === 0) {
-            $scope.$apply(function () {
-              $scope.curr_ent = undefined;
-            });
-          } else if (curr_ents.length !== 0) {
-            $scope.loading = false;
+      actP.get_curr_ent()
+        .then(function (curr_ent) {
+          _.defer($scope.$apply(function () {
+            $scope.curr_ent = curr_ent;
+            if (curr_ent) {
+              set_time_str();
+            }
+          }));
+        }, function (err) {
+          if (err.message === CONST.ACT_P_ERRS.invalid_out) {
             throw new Error(
               "programming error: current entries should " +
                 "contain at most one element at any time");
+          } else {
+            console.log("hoodie.store call failed to find current entry");
+            console.log(err);
+            throw new Error(
+              "hoodie.store call failed to find current entry");
           }
-          $scope.$apply(function () {
+        }).finally(function () {
+          _.defer($scope.$apply(function () {
             $scope.loading = false;
-          });
-        })
-        .fail(function (err) {
-          console.log("hoodie.store call failed to find current entry");
-          console.log(err);
-          $scope.loading = false;
-          throw new Error(
-            "hoodie.store call failed to find current entry");
+          }));
         });
     };
 
     $scope.stopEnt = function () {
-      $scope.loading = true;
       var curr_ent = $scope.curr_ent;
       var ent = {
         date_start: curr_ent.date,
         date_stop: new Date(),
         act: curr_ent.act
       };
-      hoodie.store.add(CONST.STORE_TYPES.ent, ent)
-        .done(function (ent) {
-          hoodie.store.remove(CONST.STORE_TYPES.curr_ent, curr_ent.id)
-            .done(function (curr_ent) {
-              // event listener calls update_ctrl_state
-            })
-            .fail(function (err) {
-              console.log(
-                "hoodie.store call failed to remove current entry");
-              console.log(err);
-              $scope.loading = false;
-              throw new Error(
-                "hoodie.store call failed to remove current entry");
-            });
-        })
-        .fail(function (err) {
-          console.log(
-            "hoodie.store call failed to add interval entry");
+      $scope.loading = true;
+      actP.add_ent(ent)
+        .then(function (ent) {
+          return actP.del_curr_ent(curr_ent.id);
+        }).then(function () {}, function (err) {
+          var msg = "hoodie.store call either " +
+                "failed to add interval entry " +
+                "or remove current entry";
+          console.log(msg);
           console.log(err);
-          $scope.loading = false;
-          throw new Error(
-            "hoodie.store call failed to add interval entry");
+          throw new Error(msg);
+        }).finally(function () {
+          _.defer($scope.$apply(function () {
+            $scope.loading = false;
+          }));
         });
     };
 
-    hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':add',
-                          update_ctrl_state);
-    hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':update',
-                          update_ctrl_state);
-    hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':remove',
-                          update_ctrl_state);
+    actP.on_curr_ent_change(update_ctrl_state);
 
     $scope.loading = true;
     update_ctrl_state();
-
+    // idea for later, needs debugging
+    // $scope.time_str = '';
+    // $scope.$watch($scope.curr_ent, set_time_str, true);
     $interval(set_time_str, TIME_STR_UPDATE_INT);
   }];

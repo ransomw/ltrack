@@ -10,5 +10,9 @@ module.exports.ACT_TYPES = {
   point: 'point'
 };
 module.exports.ACT_P_ERRS = {
-  engaged: 'already engaged in interval activity'
+  engaged: 'already engaged in interval activity',
+  invalid_out: 'data store in invalid state'
+};
+module.exports.UTIL_ERRS = {
+  num: 'wrong number of elements'
 };

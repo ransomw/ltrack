@@ -1,5 +1,6 @@
 var moment = require('moment');
 var hoodie = require('./hoodie_inst');
+var CONST = require('./constants.js');
 
 // int_ = {start: X, end: Y}, where X and Y support comparison
 // returns the intersection of the two intervals
@@ -100,12 +101,14 @@ module.exports.cmp_ents = function (ent1, ent2) {
 
 
 
-module.exports.arr_elem = function(arr) {
+module.exports.arr_elem = function(arr, opt_args) {
+  var opts = {} || opt_args;
   if (!Array.isArray(arr)) {
     throw new Error("arr_elem expects array argument");
   }
-  if (arr.length !== 1) {
-    throw new Error("expected exactly one element");
+  if (arr.length > 1 ||
+      (opts.allow_undef && arr.length === 0)) {
+    throw new Error(CONST.UTIL_ERRS.num);
   }
   return arr[0];
 };

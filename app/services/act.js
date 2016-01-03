@@ -52,6 +52,33 @@ var add_curr_ent = function (ent) {
     });
 };
 
+var get_curr_ent = function () {
+  try {
+    return util.conv_p(hoodie.store.findAll(CONST.STORE_TYPES.curr_ent))
+      .then(function (curr_ents) {
+        return util.arr_elem(curr_ents, {allow_undef: true});
+      });
+  } catch (e) {
+    if (e.message === CONST.UTIL_ERRS.num) {
+      throw new Error(CONST.ACT_P_ERRS.invalid_out);
+    } else {
+      throw e;
+    }
+  }
+};
+
+var del_curr_ent = function (curr_ent_id) {
+  return util.conv_p(hoodie.store.remove(
+    CONST.STORE_TYPES.curr_ent, curr_ent_id));
+};
+
+/* register callback */
+var on_curr_ent_change = function (cb) {
+  hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':add', cb);
+  hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':update', cb);
+  hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':remove', cb);
+};
+
 module.exports = function () {
   return {
     add_act: add_act,
@@ -60,7 +87,10 @@ module.exports = function () {
     add_ent: add_ent,
     get_ents: get_ents,
     del_ent: del_ent,
-    add_curr_ent: add_curr_ent
+    add_curr_ent: add_curr_ent,
+    get_curr_ent: get_curr_ent,
+    del_curr_ent: del_curr_ent,
+    on_curr_ent_change: on_curr_ent_change
 
   };
 };
