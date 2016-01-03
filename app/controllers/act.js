@@ -1,24 +1,26 @@
 var _ = require('lodash');
 var CONST = require('../constants');
-var hoodie = require('../hoodie_inst');
 var util = require('../util');
 var routes = require('../routes');
 
 module.exports = [
-  '$scope', '$routeParams',
-  function ActCtrl($scope, $routeParams) {
+  '$scope', '$routeParams', 'actProvider',
+  function ActCtrl($scope, $routeParams, actP) {
     var update_ents = function () {
       $scope.loading_ents = true;
-      hoodie.store.findAll(CONST.STORE_TYPES.ent)
-        .done(function (ents) {
+      actP.get_ents()
+        .then(function (ents) {
           $scope.$apply(function () {
             $scope.ents = ents.filter(function (ent) {
               return ent.act === $routeParams.id;
             }).sort(util.cmp_ents);
-            $scope.loading_ents = false;
           });
-        })
-        .fail(function (err) { util.log_throw_err(err); });
+        }, function (err) { util.log_throw_err(err); })
+        .finally(function () {
+          _.defer($scope.$apply(function () {
+            $scope.loading_ents = false;
+          }));
+        });
     };
 
     $scope.reverse = routes.reverse;
@@ -31,20 +33,23 @@ module.exports = [
     $scope.dateDiffStr = util.date_diff_str;
 
     $scope.delEnt = function (ent) {
-      hoodie.store.remove(CONST.STORE_TYPES.ent, ent.id)
-        .done(function (dent) {
+      actP.del_ent(ent.id)
+        .then(function (dent) {
           update_ents();
-        }).fail(function (err) { util.log_throw_err(err); });
+        }, function (err) { util.log_throw_err(err); });
     };
 
-    hoodie.store.find(CONST.STORE_TYPES.act, $routeParams.id)
-      .done(function (act) {
+    actP.get_act($routeParams.id)
+      .then(function (act) {
         $scope.$apply(function () {
           $scope.act = act;
-          $scope.loading_act = false;
         });
-      })
-      .fail(function (err) { util.log_throw_err(err); });
+      }, function (err) { util.log_throw_err(err); })
+      .finally(function () {
+        _.defer($scope.$apply(function () {
+          $scope.loading_act = false;
+        }));
+      });
 
     update_ents();
 

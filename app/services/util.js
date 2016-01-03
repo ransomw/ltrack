@@ -1,7 +1,11 @@
+var _ = require('lodash');
 var Q = require('q');
+var util = require('../util');
+
+var exports = {};
 
 /* convert hoodie promise to A+ */
-var conv_p = function (hp) {
+exports.conv_p = function (hp) {
   var def = Q.defer();
   hp.done(function (res) {
     def.resolve(res);
@@ -11,4 +15,4 @@ var conv_p = function (hp) {
   return def.promise;
 };
 
-module.exports.conv_p = conv_p;
+module.exports = _.merge(util, exports);
