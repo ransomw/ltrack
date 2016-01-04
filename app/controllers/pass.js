@@ -1,29 +1,29 @@
-var hoodie = require('../hoodie_inst');
+var _ = require('lodash');
 var util = require('../util');
 
 // re-enter password for server's sake
 module.exports = [
-  '$scope', '$location',
-  function ($scope, $location) {
+  '$scope', '$location', 'authProvider',
+  function ($scope, $location, authP) {
     $scope.loading = false;
 
     $scope.loginUser = function (loginForm) {
       $scope.loading = true;
-      hoodie.account.signIn(
-        hoodie.account.username, $scope.login.password,
-        {moveData: true}) // don't throw away local data
-        .done(function (username) {
+      authP.reauth($scope.login.password)
+        .then(function (username) {
           $scope.loading = false;
-          $scope.$apply(function () {
+          _.defer($scope.$apply(function () {
             $location.path('/');
-          });
-        })
-        .fail(function (err) {
+          }));
+        }, function (err) {
           console.log("hoodie sign in error");
           console.log(err);
           // todo: detailed error information
           alert("login failed");
-          $scope.loading = false;
+        }).finally(function () {
+          _.defer($scope.$apply(function () {
+            $scope.loading = false;
+          }));
         });
     };
 

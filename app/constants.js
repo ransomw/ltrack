@@ -9,6 +9,9 @@ module.exports.ACT_TYPES = {
   interval: 'interval',
   point: 'point'
 };
+module.exports.AUTH_P_ERRS = {
+  unauth: 'not authenticated by server'
+};
 module.exports.ACT_P_ERRS = {
   engaged: 'already engaged in interval activity',
   invalid_out: 'data store in invalid state'

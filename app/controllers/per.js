@@ -1,13 +1,12 @@
 var _ = require('lodash');
 var moment = require('moment');
 var CONST = require('../constants');
-var hoodie = require('../hoodie_inst');
 var util = require('../util');
 
 /* Percentage time use */
 module.exports = [
-  '$scope',
-  function PerCtrl($scope) {
+  '$scope', 'actProvider',
+  function PerCtrl($scope, actP) {
 
     var INT_END = moment();
     var INT_START_DAY = moment(INT_END).subtract(1, 'days');
@@ -66,30 +65,28 @@ module.exports = [
 
     $scope.int_type = 'day';
 
-    hoodie.store.findAll(CONST.STORE_TYPES.act)
-      .done(function (all_acts) {
+    actP.get_acts()
+      .then(function (all_acts) {
         $scope.$apply(function () {
           acts = all_acts.filter(function (act) {
             return act.atype === CONST.ACT_TYPES.interval;
           });
           $scope.loading.acts = false;
         });
-      })
-      .fail(function (err) {
+      }, function (err) {
         util.log_throw_err(
           err,
           "looking up all" + CONST.STORE_TYPES.act +
             "for AllEntsCtrl failed");
       });
 
-    hoodie.store.findAll(CONST.STORE_TYPES.ent)
-      .done(function (all_ents) {
+    actP.get_ents()
+      .then(function (all_ents) {
         $scope.$apply(function () {
           ents = all_ents;
           $scope.loading.ents = false;
         });
-      })
-      .fail(function (err) {
+      }, function (err) {
         util.log_throw_err(
           err,
           "looking up all" + CONST.STORE_TYPES.ent +
