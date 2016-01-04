@@ -1,22 +1,20 @@
-var hoodie = require('../hoodie_inst');
+var _ = require('lodash');
 
 module.exports = [
-  '$scope', '$location',
-  function LoginCtrl($scope, $location) {
+  '$scope', '$location', 'authProvider',
+  function LoginCtrl($scope, $location, authP) {
     $scope.loading = false;
 
     $scope.loginUser = function (loginForm) {
       $scope.loading = true;
-      hoodie.account.signIn(
-        $scope.login.username, $scope.login.password)
-        .done(function (username) {
+      authP.sign_in($scope.login.username, $scope.login.password)
+        .then(function (username) {
           $scope.loading = false;
-          $scope.$apply(function () {
+          _.defer($scope.$apply(function () {
             $location.path('/');
-          });
-        })
-        .fail(function (err) {
-          console.log("hoodie sign in error");
+          }));
+        }, function (err) {
+          console.log("sign_in error");
           console.log(err);
           // todo: detailed error information
           alert("login failed");
