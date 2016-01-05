@@ -112,3 +112,12 @@ module.exports.arr_elem = function(arr, opt_args) {
   }
   return arr[0];
 };
+
+module.exports.combine_date_time = function (date, time) {
+  return new Date(date.getFullYear(),
+                  date.getMonth(),
+                  date.getDate(),
+                  time.getHours(),
+                  time.getMinutes(),
+                  time.getSeconds());
+};

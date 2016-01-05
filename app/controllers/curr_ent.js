@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var moment = require('moment');
 var CONST = require('../constants');
+var util = require('../util');
 
 module.exports = [
   '$scope', '$interval', 'actProvider',
@@ -59,9 +60,18 @@ module.exports = [
 
     $scope.stopEnt = function () {
       var curr_ent = $scope.curr_ent;
-      var ent = {
+      var date_stop;
+      var ent;
+      if ($scope.custom_stop) {
+        date_stop = util.combine_date_time(
+          $scope.custom_stop.date, $scope.custom_stop.time);
+        $scope.custom_stop = undefined;
+      } else {
+        date_stop = new Date();
+      }
+      ent = {
         date_start: curr_ent.date,
-        date_stop: new Date(),
+        date_stop: date_stop,
         act: curr_ent.act
       };
       $scope.loading = true;
@@ -82,9 +92,23 @@ module.exports = [
         });
     };
 
-    actP.on_curr_ent_change(update_ctrl_state);
+    $scope.toggleCustomStop = function () {
+      var now;
+      if ($scope.custom_stop) {
+        $scope.custom_stop = undefined;
+      } else {
+        now = new Date();
+        $scope.custom_stop = {
+          date: now,
+          time: now
+        };
+      }
+    };
 
     $scope.loading = true;
+    $scope.custom_stop = undefined;
+
+    actP.on_curr_ent_change(update_ctrl_state);
     update_ctrl_state();
     // idea for later, needs debugging
     // $scope.time_str = '';

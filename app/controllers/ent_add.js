@@ -7,15 +7,6 @@ module.exports = [
   function EntAddCtrl($scope, $routeParams, $location, actP) {
     var now = new Date();
 
-    var combine_date_time = function (date, time) {
-      return new Date(date.getFullYear(),
-                      date.getMonth(),
-                      date.getDate(),
-                      time.getHours(),
-                      time.getMinutes(),
-                      time.getSeconds());
-    };
-
     $scope.ACT_TYPES = _.cloneDeep(CONST.ACT_TYPES);
 
     // interval entry
@@ -40,9 +31,9 @@ module.exports = [
         alert("fill in all fields");
         return;
       }
-      ent.date_start = combine_date_time(
+      ent.date_start = util.combine_date_time(
         $scope.ient.date_start, $scope.ient.time_start);
-      ent.date_stop = combine_date_time(
+      ent.date_stop = util.combine_date_time(
         $scope.ient.date_stop, $scope.ient.time_stop);
       ent.act = $scope.act.id;
       actP.add_ent(ent)
@@ -60,7 +51,7 @@ module.exports = [
         alert("fill in date and time fields");
         return;
       }
-      ent.date = combine_date_time(
+      ent.date = util.combine_date_time(
         $scope.pent.date, $scope.pent.time);
       ent.act = $scope.act.id;
       ent.note = $scope.pent.note || "";

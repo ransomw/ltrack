@@ -9,6 +9,22 @@
         <button ng-click="stopEnt()">
           Done
         </button>
+        <button ng-click="toggleCustomStop()">
+          At
+        </button>
+        <div ng-show="custom_stop">
+          <div>
+            <label for="date-stop">Stop date</label>
+            <input type="date" name="date-stop" id="date-stop"
+                   ng-model="custom_stop.date">
+          </div>
+          <div>
+            <label for="time-stop">Stop time</label>
+            <input type="time" name="time-stop" id="time-stop"
+                   ng-model="custom_stop.time">
+          </div>
+        </div>
+
       </div>
       <div class="three columns">&nbsp</div>
     </div>
