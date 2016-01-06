@@ -14,6 +14,7 @@ module.exports.AUTH_P_ERRS = {
 };
 module.exports.ACT_P_ERRS = {
   engaged: 'already engaged in interval activity',
+  invalid_in: 'data store in invalid input',
   invalid_out: 'data store in invalid state'
 };
 module.exports.UTIL_ERRS = {

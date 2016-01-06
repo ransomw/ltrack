@@ -12,30 +12,59 @@ module.exports = [
       })[0];
     };
 
-    $scope.logged_in = util.logged_in;
-    $scope.reverse = routes.reverse;
-    $scope.loading = true;
-    if (!util.logged_in()) {
-      $scope.loading = false;
-    } else {
-      actP.get_acts()
-        .then(function (acts) {
-          $scope.$apply(function () {
-            $scope.acts = acts;
-            // prevent undefined option from appearing
-            if ($scope.acts.length !== 0) {
-              $scope.ent = {act: $scope.acts[0].id};
-            }
-            $scope.loading = false;
-          });
-        }, function (err) {
-          console.log(
-            "looking up all activities for home ctrl failed");
+    var make_get_custom_date = function (date_time_obj) {
+      return function () {
+        if (!date_time_obj.date) {
+          return undefined;
+        }
+        return util.combine_date_time(
+          date_time_obj.date, date_time_obj.time);
+      };
+    };
+
+    // var make_toggle_custom_date = function (date_time_obj) {
+    //   return function () {
+    //     var now;
+    //     if (date_time_obj.date) {
+    //       date_time_obj = undefined;
+    //     } else {
+    //       now = new Date();
+    //       date_time_obj.date = now;
+    //       date_time_obj.time = now;
+    //     }
+    //   };
+    // };
+
+    /* add interval entry */
+    var add_ent_int = function (ent, act) {
+      var get_custom_start = make_get_custom_date($scope.custom_date);
+      var custom_stop = (make_get_custom_date($scope.custom_date.stop)());
+      var add_ent_p;
+      if (custom_stop) {
+        ent.act = act.id;
+        ent.date_start = get_custom_start();
+        ent.date_stop = custom_stop;
+        add_ent_p = actP.add_ent(ent);
+      } else {
+        ent.date = get_custom_start() || new Date();
+        ent.act = act.id;
+        add_ent_p = actP.add_curr_ent(ent);
+      }
+      return add_ent_p.then(function (new_ent) {
+        if (new_ent.type === CONST.STORE_TYPES.ent) {
+          alert("created new entry");
+          $scope.custom_date = {stop: {}};
+        }
+      }, function (err) {
+        if (err.message === CONST.ACT_P_ERRS.engaged) {
+          alert("already engaged in an interval activity");
+        } else {
+          console.log("current entry store error");
           console.log(err);
-          throw new Error(
-            "looking up all activities for home ctrl failed");
-        });
-    }
+          alert("entry store error");
+        }
+      });
+    };
 
     $scope.signupUser = function (signupForm) {
       $scope.loading = true;
@@ -67,53 +96,100 @@ module.exports = [
       return curr_act && curr_act.atype === CONST.ACT_TYPES.point;
     };
 
+    $scope.currActIsInt = function () {
+      var curr_act = get_curr_act();
+      return curr_act && curr_act.atype === CONST.ACT_TYPES.interval;
+    };
+
     $scope.addEnt = function (entForm) {
       var act;
       var ent;
+      var add_ent_p;
       $scope.loading = true;
       act = get_curr_act();
       if (act.atype === CONST.ACT_TYPES.point) {
         ent = _.cloneDeep($scope.ent);
         ent.date = new Date();
-        actP.add_ent(ent)
+        add_ent_p = actP.add_ent(ent)
           .then(function (ent) {
             alert("entry stored");
+            $scope.ent.note = undefined;
           }, function (err) {
             console.log("entry store error");
             console.log(err);
             alert("entry store error");
-          })
-          .finally(function () {
-            _.defer($scope.$apply(function () {
-              $scope.loading = false;
-            }));
           });
       } else if (act.atype === CONST.ACT_TYPES.interval) {
-        ent = _.cloneDeep($scope.ent);
-        ent.date = new Date();
-        ent.act_name = act.name; // convenience
-        actP.add_curr_ent(ent)
-          .then(function () {
-          }, function (err) {
-            if (err.message === CONST.ACT_P_ERRS.engaged) {
-              alert("already engaged in an interval activity");
-            } else {
-              console.log("current entry store error");
-              console.log(err);
-              alert("entry store error");
-            }
-          })
-          .finally(function () {
-            _.defer($scope.$apply(function () {
-              $scope.loading = false;
-            }));
-          });
+        add_ent_p = add_ent_int(_.cloneDeep($scope.ent), act);
       } else {
         console.log("unknown activity type");
         console.log(act);
         $scope.loading = false;
         throw new Error("unknown activity type");
       }
+      add_ent_p.finally(function () {
+        _.defer($scope.$apply(function () {
+          $scope.loading = false;
+        }));
+      });
     };
+
+    $scope.custom_date = {stop: {}};
+    // $scope.toggleCustomStart = (function ($scope) {
+    //   make_toggle_custom_date(
+    //     $scope.custom_date);
+    // }($scope));
+    // $scope.toggleCustomStop = (function ($scope) {
+    //   make_toggle_custom_date(
+    //     $scope.custom_date.stop);
+    // }($scope));
+
+    $scope.toggleCustomStart = function () {
+      var now;
+      if ($scope.custom_date.date) {
+        $scope.custom_date = undefined;
+      } else {
+        now = new Date();
+        $scope.custom_date.date = now;
+        $scope.custom_date.time = now;
+      }
+    };
+
+    $scope.toggleCustomStop = function () {
+      var now;
+      if ($scope.custom_date.stop.date) {
+        $scope.custom_date.stop = undefined;
+      } else {
+        now = new Date();
+        $scope.custom_date.stop.date = now;
+        $scope.custom_date.stop.time = now;
+      }
+    };
+
+    $scope.logged_in = util.logged_in;
+    $scope.reverse = routes.reverse;
+
+    $scope.loading = true;
+    if (!util.logged_in()) {
+      $scope.loading = false;
+    } else {
+      actP.get_acts()
+        .then(function (acts) {
+          _.defer($scope.$apply(function () {
+            $scope.acts = acts;
+            // prevent undefined option from appearing
+            if ($scope.acts.length !== 0) {
+              $scope.ent = {act: $scope.acts[0].id};
+            }
+            $scope.loading = false;
+          }));
+        }, function (err) {
+          console.log(
+            "looking up all activities for home ctrl failed");
+          console.log(err);
+          throw new Error(
+            "looking up all activities for home ctrl failed");
+        });
+    }
 
   }];

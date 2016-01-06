@@ -61,6 +61,42 @@
             <input type="text"
                    ng-model="ent.note"></input>
           </div>
+
+          <div ng-show="acts && currActIsInt()">
+            <button ng-click="toggleCustomStart()">
+              At
+            </button>
+
+            <div ng-show="custom_date.date">
+              <div>
+                <label for="date-start">Start date</label>
+                <input type="date" name="date-start" id="date-start"
+                       ng-model="custom_date.date">
+              </div>
+              <div>
+                <label for="time-start">Start time</label>
+                <input type="time" name="time-start" id="time-start"
+                       ng-model="custom_date.time">
+              </div>
+              <button ng-click="toggleCustomStop()">
+                Til
+              </button>
+              <div ng-show="custom_date.stop && custom_date.stop.date">
+                <div>
+                  <label for="date-stop">Stop date</label>
+                  <input type="date" name="date-stop" id="date-stop"
+                         ng-model="custom_date.stop.date">
+                </div>
+                <div>
+                  <label for="time-stop">Stop time</label>
+                  <input type="time" name="time-stop" id="time-stop"
+                         ng-model="custom_date.stop.time">
+                </div>
+              </div>
+            </div>
+
+          </div>
+
         </form>
       </div>
       <div ng-hide="acts && acts.length !== 0">

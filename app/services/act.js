@@ -1,6 +1,11 @@
+var Q = require('q');
 var CONST = require('../constants');
 var hoodie = require('../hoodie_inst');
 var util = require('./util');
+
+var make_err = function (type, msg) {
+  return new Error([type, msg].join(':'));
+};
 
 /* add activity */
 var add_act = function (act) {
@@ -24,7 +29,51 @@ var get_act = function (act_id) {
 
 /* add entry */
 var add_ent = function (ent) {
-  return util.conv_p(hoodie.store.add(CONST.STORE_TYPES.ent, ent));
+  return Q().then(function () {
+    return get_act(ent.act);
+  }).then(function (act) {
+    if (!act) {
+      console.log(ent.act);
+      throw make_err(CONST.ACT_P_ERRS.invalid_in,
+                           "unknown activity id");
+    } else if (act.atype === CONST.ACT_TYPES.interval) {
+      if (typeof ent.date_start === 'undefined' ||
+          typeof ent.date_stop === 'undefined') {
+        console.log(ent);
+        throw make_err(CONST.ACT_P_ERRS.invalid_in,
+                             "entry missing required field");
+      }
+      if (!(ent.date_start instanceof Date ||
+            ent.date_stop instanceof Date)) {
+        console.log(ent);
+        throw make_err(CONST.ACT_P_ERRS.invalid_in,
+                             "entry dates of incorrect type");
+      }
+      if (!(ent.date_stop - ent.date_start > 0)) {
+        throw make_err(CONST.ACT_P_ERRS.invalid_in,
+                             "entry stop must preceed start");
+      }
+    } else if (act.atype === CONST.ACT_TYPES.point) {
+      if (typeof ent.date === 'undefined') {
+        console.log(ent);
+        throw make_err(CONST.ACT_P_ERRS.invalid_in,
+                             "entry missing required field");
+      }
+      if (!(ent.date instanceof Date)) {
+        console.log(ent);
+        throw make_err(CONST.ACT_P_ERRS.invalid_in,
+                             "entry date of incorrect type");
+      }
+    } else {
+      // programming error
+      throw Error("unknown activity type");
+    }
+  }, function (err) {
+    console.log(err);
+    throw err;
+  }).then(function () {
+    return util.conv_p(hoodie.store.add(CONST.STORE_TYPES.ent, ent));
+  });
 };
 
 /* get all entries */
