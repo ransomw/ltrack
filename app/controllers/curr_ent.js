@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var moment = require('moment');
+var Q = require('q');
 var CONST = require('../constants');
 var util = require('../util');
 
@@ -31,26 +32,43 @@ module.exports = [
     };
 
     var update_ctrl_state = function () {
+      var curr_ent_err_cb = function (err) {
+        if (err.message === CONST.ACT_P_ERRS.invalid_out) {
+          throw new Error(
+            "programming error: current entries should " +
+              "contain at most one element at any time");
+        } else {
+          console.log("hoodie.store call failed to find current entry");
+          console.log(err);
+          throw new Error(
+            "hoodie.store call failed to find current entry");
+        }
+      };
+      var curr_ent_p = actP.get_curr_ent()
+            .then(function (curr_ent) {
+              return curr_ent;
+            }, curr_ent_err_cb);
+      var act_p = curr_ent_p.then(function (curr_ent) {
+        if (curr_ent) {
+          return actP.get_act(curr_ent.act);
+        }
+        return undefined;
+      });
+
       $scope.loading = true;
-      actP.get_curr_ent()
-        .then(function (curr_ent) {
+      Q.all([curr_ent_p, act_p])
+        .spread(function (curr_ent, act) {
           _.defer($scope.$apply(function () {
             $scope.curr_ent = curr_ent;
             if (curr_ent) {
+              if (!act) {
+                throw new Error(
+                  "couldn't find activity for current entry");
+              }
+              $scope.curr_ent.act_obj = act;
               set_time_str();
             }
           }));
-        }, function (err) {
-          if (err.message === CONST.ACT_P_ERRS.invalid_out) {
-            throw new Error(
-              "programming error: current entries should " +
-                "contain at most one element at any time");
-          } else {
-            console.log("hoodie.store call failed to find current entry");
-            console.log(err);
-            throw new Error(
-              "hoodie.store call failed to find current entry");
-          }
         }).finally(function () {
           _.defer($scope.$apply(function () {
             $scope.loading = false;
@@ -59,7 +77,7 @@ module.exports = [
     };
 
     $scope.stopEnt = function () {
-      var curr_ent = $scope.curr_ent;
+      var curr_ent = _.omit($scope.curr_ent, ['act_obj']);
       var date_stop;
       var ent;
       if ($scope.custom_stop) {
@@ -70,7 +88,7 @@ module.exports = [
         date_stop = new Date();
       }
       ent = {
-        date_start: curr_ent.date,
+        date_start: new Date(curr_ent.date),
         date_stop: date_stop,
         act: curr_ent.act
       };
