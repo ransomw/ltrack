@@ -28,22 +28,6 @@ const register = function (server, options, next) {
         console.log(sName + " doesn't exist");
       }
     }));
-  }).then(function () {
-    return hstore.open('hack');
-  }).then(function (store) {
-    console.log("open ok");
-    return store.findAll();
-  }, function (err) {
-    console.log("open failed");
-    console.log(err);
-    next();
-  }).then(function (docs) {
-    console.log("got docs");
-    console.log(docs);
-    next();
-  }, function (err) {
-    console.log("get docs failed");
-    console.log(err);
     next();
   });
 
