@@ -6,6 +6,12 @@ var routes = require('../routes');
 module.exports = [
   '$scope', 'actProvider', 'authProvider',
   function HomeCtrl($scope, actP, authP) {
+    const clearLoading = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading = false;
+      }));
+    };
+
     var get_curr_act = function () {
       return $scope.acts.filter(function (act) {
         return act.id === $scope.ent.act;
@@ -59,8 +65,8 @@ module.exports = [
         if (err.message === CONST.ACT_P_ERRS.engaged) {
           alert("already engaged in an interval activity");
         } else {
-          console.log("current entry store error");
-          console.log(err);
+          console.error("current entry store error");
+          console.error(err);
           alert("entry store error");
         }
       });
@@ -80,15 +86,11 @@ module.exports = [
           // todo: sign in user s.t. views update
           alert("signed up!");
         }, function (err) {
-          console.log("hoodie sign up error");
-          console.log(err);
+          console.error("sign up error");
+          console.error(err);
           // todo: detailed error information
           alert("sign up failed");
-        }).finally(function () {
-          _.defer($scope.$apply(function () {
-            $scope.loading = false;
-          }));
-        });
+        }).then(clearLoading, clearLoading);
     };
 
     $scope.currActIsPt = function () {
@@ -115,23 +117,19 @@ module.exports = [
             alert("entry stored");
             $scope.ent.note = undefined;
           }, function (err) {
-            console.log("entry store error");
-            console.log(err);
+            console.error("entry store error");
+            console.error(err);
             alert("entry store error");
           });
       } else if (act.atype === CONST.ACT_TYPES.interval) {
         add_ent_p = add_ent_int(_.cloneDeep($scope.ent), act);
       } else {
-        console.log("unknown activity type");
-        console.log(act);
+        console.error("unknown activity type");
+        console.error(act);
         $scope.loading = false;
         throw new Error("unknown activity type");
       }
-      add_ent_p.finally(function () {
-        _.defer($scope.$apply(function () {
-          $scope.loading = false;
-        }));
-      });
+      add_ent_p.then(clearLoading, clearLoading);
     };
 
     $scope.custom_date = {stop: {}};
@@ -175,7 +173,7 @@ module.exports = [
     } else {
       actP.get_acts()
         .then(function (acts) {
-          _.defer($scope.$apply(function () {
+          _.defer(() => $scope.$apply(function () {
             $scope.acts = acts;
             // prevent undefined option from appearing
             if ($scope.acts.length !== 0) {
@@ -184,9 +182,9 @@ module.exports = [
             $scope.loading = false;
           }));
         }, function (err) {
-          console.log(
+          console.error(
             "looking up all activities for home ctrl failed");
-          console.log(err);
+          console.error(err);
           throw new Error(
             "looking up all activities for home ctrl failed");
         });

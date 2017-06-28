@@ -10,12 +10,12 @@ module.exports = [
       authP.sign_in($scope.login.username, $scope.login.password)
         .then(function (username) {
           $scope.loading = false;
-          _.defer($scope.$apply(function () {
+          _.defer(() => $scope.$apply(function () {
             $location.path('/');
           }));
         }, function (err) {
-          console.log("sign_in error");
-          console.log(err);
+          console.error("sign_in error");
+          console.error(err);
           // todo: detailed error information
           alert("login failed");
           $scope.loading = false;

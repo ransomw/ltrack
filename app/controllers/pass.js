@@ -5,6 +5,12 @@ var util = require('../util');
 module.exports = [
   '$scope', '$location', 'authProvider',
   function ($scope, $location, authP) {
+    const clearLoading = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading = false;
+      }));
+    };
+
     $scope.loading = false;
 
     $scope.loginUser = function (loginForm) {
@@ -12,19 +18,15 @@ module.exports = [
       authP.reauth($scope.login.password)
         .then(function (username) {
           $scope.loading = false;
-          _.defer($scope.$apply(function () {
+          _.defer(() => $scope.$apply(function () {
             $location.path('/');
           }));
         }, function (err) {
-          console.log("hoodie sign in error");
-          console.log(err);
+          console.error("sign in error");
+          console.error(err);
           // todo: detailed error information
           alert("login failed");
-        }).finally(function () {
-          _.defer($scope.$apply(function () {
-            $scope.loading = false;
-          }));
-        });
+        }).then(clearLoading, clearLoading);
     };
 
     if (!util.logged_in()) {

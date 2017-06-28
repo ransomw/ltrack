@@ -1,47 +1,28 @@
 {
   "name": "ltrack",
   "version": "0.0.0",
-  "bundleDependencies": [
-    "hoodie-plugin-appconfig",
-    "hoodie-plugin-email",
-    "hoodie-plugin-users",
-    "hoodie-server"
-  ],
   "dependencies": {
-    "hoodie-plugin-appconfig": "2.0.1",
-    "hoodie-plugin-email": "1.0.0",
-    "hoodie-plugin-users": "2.2.2",
-    "hoodie-server": "4.0.2",
-    "hoodie-cli": "0.6.3",
-
+    "hoodie": "28.2.0",
     "angular": "1.3.15",
     "angular-route": "1.3.15",
     "lodash": "3.10.0",
     "moment": "2.10.6",
     "jquery": "2.1.4",
-
     "handlebars": "4.0.5",
-    "browserify": "12.0.1",
+    "browserify": "13.0.0",
+    "watchify": "3.7.0",
     "fs-extra": "0.26.3",
     "less": "2.5.3",
-    "q": "1.4.1",
     "yargs": "3.31.0"
   },
   "engines": {
-    "node": "0.10.32"
+    "node": "7.2.1"
   },
   "files": [
     "www/"
   ],
-  "hoodie": {
-    "plugins": [
-      "hoodie-plugin-appconfig",
-      "hoodie-plugin-email",
-      "hoodie-plugin-users"
-    ]
-  },
   "scripts": {
-    "start": "node node_modules/hoodie-server/bin/start"
+    "start": "hoodie"
   },
   "type": "app",
   "directories": {}

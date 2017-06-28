@@ -1,7 +1,6 @@
 var fs = require('fs');
 var path = require('path');
 var fse = require('fs-extra');
-var Q = require('q');
 var watchify = require('watchify');
 var browserify = require('browserify');
 var less = require('less');
@@ -9,7 +8,7 @@ var Handlebars = require('handlebars');
 
 // dest paths
 var PATH_CLIENT_STATIC_DIR = path.join(
-  'www');
+  'public');
 var PATH_CLIENT_BUNDLE = path.join(
   PATH_CLIENT_STATIC_DIR, 'bundle.js');
 var PATH_GEN_STYLES = path.join(
@@ -27,39 +26,39 @@ var PATH_PAGE_TEMPLATE = path.join(
 /* bfy: browserify() instance */
 var make_write_bundle = function (bfy, path_bundle) {
   return function () {
-    var deferred = Q.defer();
     var stream_bundle = bfy.bundle();
     stream_bundle.pipe(fs.createWriteStream(path_bundle));
-    stream_bundle.on('end', function () {
-      deferred.resolve();
+    return new Promise(function (resolve, reject) {
+      stream_bundle.on('end', function () {
+        resolve();
+      });
     });
-    return deferred.promise;
   };
 };
 
 // yea, streams would be better... idk if less and handlebars support?
 var read_file = function (file_path) {
-  var deferred = Q.defer();
-  fs.readFile(file_path, 'utf8', function (err, data) {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      deferred.resolve(data);
-    }
+  return new Promise(function (resolve, reject) {
+    fs.readFile(file_path, 'utf8', function (err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
   });
-  return deferred.promise;
 };
 
 var write_file = function (file_path, file_str) {
-  var deferred = Q.defer();
-  fs.writeFile(file_path, file_str, function (err) {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      deferred.resolve();
-    }
+  return new Promise(function (resolve, reject) {
+    fs.writeFile(file_path, file_str, function (err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
-  return deferred.promise;
 };
 
 var build_style = function(filename) {
@@ -76,18 +75,18 @@ var build_style = function(filename) {
 };
 
 var build_styles_once = function () {
-  return Q().then(function () {
-    var deferred = Q.defer();
-    fs.readdir(PATH_SRC_STYLES, function(err, files) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve(files);
-      }
+  return Promise.resolve().then(function () {
+    return new Promise(function (resolve, reject) {
+      fs.readdir(PATH_SRC_STYLES, function(err, files) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(files);
+        }
+      });
     });
-    return deferred.promise;
   }).then(function (files) {
-    return Q.all(files.map(build_style));
+    return Promise.all(files.map(build_style));
   });
 };
 
@@ -137,7 +136,7 @@ var build_client_js = function (cts) {
 
 /* cts (boolean): build continuously */
 module.exports.build_client = function (cts) {
-  return Q.all([
+  return Promise.all([
     build_html(cts),
     build_styles(cts),
     build_client_js(cts)

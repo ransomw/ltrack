@@ -6,6 +6,18 @@ var routes = require('../routes');
 module.exports = [
   '$scope', '$routeParams', 'actProvider',
   function ActCtrl($scope, $routeParams, actP) {
+    const clearLoadingEnts = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading_ents = false;
+      }));
+    };
+
+    const clearLoadingAct = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading_act = false;
+      }));
+    };
+
     var update_ents = function () {
       $scope.loading_ents = true;
       actP.get_ents()
@@ -16,11 +28,7 @@ module.exports = [
             }).sort(util.cmp_ents);
           });
         }, function (err) { util.log_throw_err(err); })
-        .finally(function () {
-          _.defer($scope.$apply(function () {
-            $scope.loading_ents = false;
-          }));
-        });
+        .then(clearLoadingEnts, clearLoadingEnts);
     };
 
     $scope.reverse = routes.reverse;
@@ -45,11 +53,7 @@ module.exports = [
           $scope.act = act;
         });
       }, function (err) { util.log_throw_err(err); })
-      .finally(function () {
-        _.defer($scope.$apply(function () {
-          $scope.loading_act = false;
-        }));
-      });
+      .then(clearLoadingAct, clearLoadingAct);
 
     update_ents();
 

@@ -1,12 +1,16 @@
 var _ = require('lodash');
 var moment = require('moment');
-var Q = require('q');
 var CONST = require('../constants');
 var util = require('../util');
 
 module.exports = [
   '$scope', '$interval', 'actProvider',
   function ($scope, $interval, actP) {
+    const clearLoading = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading = false;
+      }));
+    };
 
     var TIME_STR_UPDATE_INT = 1000 * 60; // ms
 
@@ -38,10 +42,10 @@ module.exports = [
             "programming error: current entries should " +
               "contain at most one element at any time");
         } else {
-          console.log("hoodie.store call failed to find current entry");
-          console.log(err);
+          console.error("data store call failed to find current entry");
+          console.error(err);
           throw new Error(
-            "hoodie.store call failed to find current entry");
+            "data store call failed to find current entry");
         }
       };
       var curr_ent_p = actP.get_curr_ent()
@@ -56,9 +60,9 @@ module.exports = [
       });
 
       $scope.loading = true;
-      Q.all([curr_ent_p, act_p])
-        .spread(function (curr_ent, act) {
-          _.defer($scope.$apply(function () {
+      Promise.all([curr_ent_p, act_p])
+        .then(_.spread(function (curr_ent, act) {
+          _.defer(() => $scope.$apply(function () {
             $scope.curr_ent = curr_ent;
             if (curr_ent) {
               if (!act) {
@@ -69,11 +73,7 @@ module.exports = [
               set_time_str();
             }
           }));
-        }).finally(function () {
-          _.defer($scope.$apply(function () {
-            $scope.loading = false;
-          }));
-        });
+        })).then(clearLoading, clearLoading);
     };
 
     $scope.stopEnt = function () {
@@ -97,17 +97,13 @@ module.exports = [
         .then(function (ent) {
           return actP.del_curr_ent(curr_ent.id);
         }).then(function () {}, function (err) {
-          var msg = "hoodie.store call either " +
+          var msg = "data store call either " +
                 "failed to add interval entry " +
                 "or remove current entry";
-          console.log(msg);
-          console.log(err);
+          console.error(msg);
+          console.error(err);
           throw new Error(msg);
-        }).finally(function () {
-          _.defer($scope.$apply(function () {
-            $scope.loading = false;
-          }));
-        });
+        }).then(clearLoading, clearLoading);
     };
 
     $scope.toggleCustomStop = function () {

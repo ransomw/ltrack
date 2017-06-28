@@ -1,11 +1,11 @@
-var moment = require('moment');
-var hoodie = require('./hoodie_inst');
-var CONST = require('./constants.js');
+const moment = require('moment');
+const logged_in = require('./hoodie_iface').auth.logged_in;
+const CONST = require('./constants.js');
 
 // int_ = {start: X, end: Y}, where X and Y support comparison
 // returns the intersection of the two intervals
 // or null if they don't intersect
-var intersection = function (int1, int2) {
+const intersection = function (int1, int2) {
   var start, end;
   if (int1.start >= int1.end ||
       int2.start >= int2.end) {
@@ -27,25 +27,22 @@ var intersection = function (int1, int2) {
   }
 };
 
-module.exports.intersection = intersection;
+var exports = {};
 
-module.exports.log_throw_err = function (err, msg) {
+exports.intersection = intersection;
+
+exports.logged_in = logged_in;
+
+exports.log_throw_err = function (err, msg) {
   if (!msg) {
     msg = "unspecified error";
   }
-  console.log(msg);
-  console.log(err);
+  console.error(msg);
+  console.error(err);
   throw new Error(msg);
 };
 
-module.exports.logged_in = function () {
-  if (hoodie.account.username) {
-    return true;
-  }
-  return false;
-};
-
-module.exports.date_str = function (date) {
+exports.date_str = function (date) {
   var m;
   if (!date) {
     return "";
@@ -56,7 +53,7 @@ module.exports.date_str = function (date) {
   );
 };
 
-module.exports.ms_to_str = function(n_ms) {
+exports.ms_to_str = function(n_ms) {
   var sec;
   var min;
   var hr;
@@ -69,7 +66,7 @@ module.exports.ms_to_str = function(n_ms) {
   return hr.toFixed(1) + "hr";
 };
 
-module.exports.date_diff_str = function (start, end) {
+exports.date_diff_str = function (start, end) {
   var sec = Math.floor((end - start)/1000);
   var min = Math.floor(sec/60);
   var hr;
@@ -84,7 +81,7 @@ module.exports.date_diff_str = function (start, end) {
   return hr.toFixed(1) + "hr";
 };
 
-module.exports.cmp_ents = function (ent1, ent2) {
+exports.cmp_ents = function (ent1, ent2) {
   var date1, date2;
   if (ent1.date_start) {
     date1 = new Date(ent1.date_start);
@@ -99,9 +96,7 @@ module.exports.cmp_ents = function (ent1, ent2) {
   return date2 - date1;
 };
 
-
-
-module.exports.arr_elem = function(arr, opt_args) {
+exports.arr_elem = function(arr, opt_args) {
   var opts = {} || opt_args;
   if (!Array.isArray(arr)) {
     throw new Error("arr_elem expects array argument");
@@ -113,7 +108,7 @@ module.exports.arr_elem = function(arr, opt_args) {
   return arr[0];
 };
 
-module.exports.combine_date_time = function (date, time) {
+exports.combine_date_time = function (date, time) {
   return new Date(date.getFullYear(),
                   date.getMonth(),
                   date.getDate(),
@@ -121,3 +116,5 @@ module.exports.combine_date_time = function (date, time) {
                   time.getMinutes(),
                   time.getSeconds());
 };
+
+module.exports = exports;

@@ -1,51 +1,49 @@
-var Q = require('q');
-var CONST = require('../constants');
-var hoodie = require('../hoodie_inst');
-var util = require('./util');
+const CONST = require('../constants');
+const store = require('../hoodie_iface').store;
+const arr_elem = require('../util').arr_elem;
 
-var make_err = function (type, msg) {
+const make_err = function (type, msg) {
   return new Error([type, msg].join(':'));
 };
 
 /* add activity */
-var add_act = function (act) {
-  // hoodie sets id attribute automatically
-  return util.conv_p(hoodie.store.add(CONST.STORE_TYPES.act, act));
+const add_act = function (act) {
+  return store.create(CONST.STORE_TYPES.act, act);
 };
 
 /* get all activities */
-var get_acts = function () {
-  return util.conv_p(hoodie.store.findAll(CONST.STORE_TYPES.act));
+const get_acts = function () {
+  return store.read(CONST.STORE_TYPES.act);
 };
 
 /* get activity by id */
-var get_act = function (act_id) {
+const get_act = function (act_id) {
   return get_acts().then(function (acts) {
-    return util.arr_elem(acts.filter(function (act) {
+    return arr_elem(acts.filter(function (act) {
       return act.id === act_id;
     }));
   });
 };
 
 /* add entry */
-var add_ent = function (ent) {
-  return Q().then(function () {
+const add_ent = function (ent) {
+  return Promise.resolve().then(function () {
     return get_act(ent.act);
   }).then(function (act) {
     if (!act) {
-      console.log(ent.act);
+      console.error(ent.act);
       throw make_err(CONST.ACT_P_ERRS.invalid_in,
                            "unknown activity id");
     } else if (act.atype === CONST.ACT_TYPES.interval) {
       if (typeof ent.date_start === 'undefined' ||
           typeof ent.date_stop === 'undefined') {
-        console.log(ent);
+        console.error(ent);
         throw make_err(CONST.ACT_P_ERRS.invalid_in,
                              "entry missing required field");
       }
       if (!(ent.date_start instanceof Date ||
             ent.date_stop instanceof Date)) {
-        console.log(ent);
+        console.error(ent);
         throw make_err(CONST.ACT_P_ERRS.invalid_in,
                              "entry dates of incorrect type");
       }
@@ -55,12 +53,12 @@ var add_ent = function (ent) {
       }
     } else if (act.atype === CONST.ACT_TYPES.point) {
       if (typeof ent.date === 'undefined') {
-        console.log(ent);
+        console.error(ent);
         throw make_err(CONST.ACT_P_ERRS.invalid_in,
                              "entry missing required field");
       }
       if (!(ent.date instanceof Date)) {
-        console.log(ent);
+        console.error(ent);
         throw make_err(CONST.ACT_P_ERRS.invalid_in,
                              "entry date of incorrect type");
       }
@@ -69,25 +67,25 @@ var add_ent = function (ent) {
       throw Error("unknown activity type");
     }
   }, function (err) {
-    console.log(err);
+    console.error(err);
     throw err;
   }).then(function () {
-    return util.conv_p(hoodie.store.add(CONST.STORE_TYPES.ent, ent));
+    return store.create(CONST.STORE_TYPES.ent, ent);
   });
 };
 
 /* get all entries */
-var get_ents = function () {
-  return util.conv_p(hoodie.store.findAll(CONST.STORE_TYPES.ent));
+const get_ents = function () {
+  return store.read(CONST.STORE_TYPES.ent);
 };
 
 /* delete entry */
-var del_ent = function (ent_id) {
-  return util.conv_p(hoodie.store.remove(CONST.STORE_TYPES.ent, ent_id));
+const del_ent = function (ent_id) {
+  return store.del(CONST.STORE_TYPES.ent, ent_id);
 };
 
-var add_curr_ent = function (ent) {
-  return util.conv_p(hoodie.store.findAll(CONST.STORE_TYPES.curr_ent))
+const add_curr_ent = function (ent) {
+  return store.read(CONST.STORE_TYPES.curr_ent)
     .then(function (curr_ents) {
       if (curr_ents.length !== 0) {
         // todo: consider using custom error w/ extra attrs
@@ -95,17 +93,16 @@ var add_curr_ent = function (ent) {
         //       and for chaining errors
         throw new Error(CONST.ACT_P_ERRS.engaged);
       } else {
-        return util.conv_p(
-          hoodie.store.add(CONST.STORE_TYPES.curr_ent, ent));
+        return store.create(CONST.STORE_TYPES.curr_ent, ent);
       }
     });
 };
 
-var get_curr_ent = function () {
+const get_curr_ent = function () {
   try {
-    return util.conv_p(hoodie.store.findAll(CONST.STORE_TYPES.curr_ent))
+    return store.read(CONST.STORE_TYPES.curr_ent)
       .then(function (curr_ents) {
-        return util.arr_elem(curr_ents, {allow_undef: true});
+        return arr_elem(curr_ents, {allow_undef: true});
       });
   } catch (e) {
     if (e.message === CONST.UTIL_ERRS.num) {
@@ -116,16 +113,14 @@ var get_curr_ent = function () {
   }
 };
 
-var del_curr_ent = function (curr_ent_id) {
-  return util.conv_p(hoodie.store.remove(
-    CONST.STORE_TYPES.curr_ent, curr_ent_id));
+const del_curr_ent = function (curr_ent_id) {
+  return store.del(
+    CONST.STORE_TYPES.curr_ent, curr_ent_id);
 };
 
 /* register callback */
-var on_curr_ent_change = function (cb) {
-  hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':add', cb);
-  hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':update', cb);
-  hoodie.store.on(CONST.STORE_TYPES.curr_ent + ':remove', cb);
+const on_curr_ent_change = function (cb) {
+  store.onChange(CONST.STORE_TYPES.curr_ent, cb);
 };
 
 module.exports = function () {

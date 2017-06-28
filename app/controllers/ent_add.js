@@ -38,7 +38,7 @@ module.exports = [
       ent.act = $scope.act.id;
       actP.add_ent(ent)
         .then(function (ent) {
-          _.defer($scope.$apply(function () {
+          _.defer(() => $scope.$apply(function () {
             $location.path('#/activity/' + $scope.act.id);
           }));
         }, function (err) { util.log_throw_err(err); });
@@ -57,7 +57,7 @@ module.exports = [
       ent.note = $scope.pent.note || "";
       actP.add_ent(ent)
         .then(function (ent) {
-          _.defer($scope.$apply(function () {
+          _.defer(() => $scope.$apply(function () {
             // todo: reverse routing here and other $location.path calls
             $location.path('#/activity/' + $scope.act.id);
           }));
@@ -67,7 +67,7 @@ module.exports = [
     $scope.loading_act = true;
     actP.get_act($routeParams.act_id)
       .then(function (act) {
-        _.defer($scope.$apply(function () {
+        _.defer(() => $scope.$apply(function () {
           $scope.act = act;
           $scope.loading_act = false;
         }));

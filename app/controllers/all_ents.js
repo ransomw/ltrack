@@ -5,6 +5,17 @@ var util = require('../util');
 module.exports =[
   '$scope', 'actProvider',
   function AllEntsCtrl($scope, actP) {
+    const clearLoadingActs = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading.acts = false;
+      }));
+    };
+
+    const clearLoadingEnts = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading.ents = false;
+      }));
+    };
 
     $scope.dateStr = util.date_str;
     $scope.dateDiffStr = util.date_diff_str;
@@ -56,11 +67,7 @@ module.exports =[
           err,
           "looking up all" + CONST.STORE_TYPES.act +
             "for AllEntsCtrl failed");
-      }).finally(function () {
-        _.defer($scope.$apply(function () {
-          $scope.loading.acts = false;
-        }));
-      });
+      }).then(clearLoadingActs, clearLoadingActs);
 
     actP.get_ents()
       .then(function (all_ents) {
@@ -72,10 +79,6 @@ module.exports =[
           err,
           "looking up all" + CONST.STORE_TYPES.ent +
             "for AllEntsCtrl failed");
-      }).finally(function () {
-        _.defer($scope.$apply(function () {
-          $scope.loading.ents = false;
-        }));
-      });
+      }).then(clearLoadingEnts, clearLoadingEnts);
 
   }];

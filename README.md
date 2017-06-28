@@ -1,2 +1,3 @@
-run `curl_hoodie.sh PORT` before building client,
-where `PORT` is the WWW port for the hoodie server
+# ltrack
+
+## the _l_ is for _life_

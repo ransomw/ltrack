@@ -1,8 +1,9 @@
 *~
 node_modules/
 data/
-www/js/vendor/
-www/bundle.js
-app/hoodie.js
-www/css/main.css
-www/index.html
+app/hoodie_iface/hoodie.js
+public/js/vendor/
+public/bundle.js
+public/css/main.css
+public/index.html
+.hoodie/

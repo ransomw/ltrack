@@ -24,8 +24,8 @@ module.exports = [
             $location.path('/');
           });
         }, function (err) {
-          console.log("error adding activity");
-          console.log(err);
+          console.error("error adding activity");
+          console.error(err);
           alert("error adding activity");
           $scope.loading = false;
         });

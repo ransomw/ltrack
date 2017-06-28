@@ -1,26 +1,28 @@
-var CONST = require('../constants');
-var _ = require('lodash');
+const _ = require('lodash');
+
+const CONST = require('../constants');
+const LogoutNoSaveError = require('../err').LogoutNoSaveError;
 
 module.exports = [
   '$scope', '$location', 'authProvider',
   function LogoutCtrl($scope, $location, authP) {
+    const nav_home = function () {
+      _.defer(() => $scope.$apply(function () {
+        $location.path('/');
+      }));
+    };
     // todo: $scope.loading to prevent double clicks
     authP.sign_out()
-      .then(function () {
-        _.defer($scope.$apply(function () {
-          $location.path('/');
-        }));
-      }, function (err) {
-        // if (err.status === 401) {
-        if (err.message === CONST.AUTH_P_ERRS.unauth) {
-          _.defer($scope.$apply(function () {
+      .then(nav_home, function (err) {
+        if (err instanceof LogoutNoSaveError) {
+          _.defer(() => $scope.$apply(function () {
             $location.path('/pass');
           }));
         } else {
-          alert("local data couldn't be synced, not signing out");
-          _.defer($scope.$apply(function () {
-            $location.path('/');
-          }));
+          alert("unexpected error on signout, see log");
+          console.error(err);
+          console.error(err.stack);
+          nav_home();
         }
       });
   }];
