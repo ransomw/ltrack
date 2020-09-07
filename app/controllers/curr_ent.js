@@ -12,6 +12,13 @@ module.exports = [
       }));
     };
 
+    const setLoading = function () {
+      _.defer(() => $scope.$apply(function () {
+        $scope.loading = true;
+      }));
+    };
+
+
     var TIME_STR_UPDATE_INT = 1000 * 60; // ms
 
     var set_time_str = function () {
@@ -59,7 +66,9 @@ module.exports = [
         return undefined;
       });
 
-      $scope.loading = true;
+      // $scope.loading = true;
+      setLoading()
+
       Promise.all([curr_ent_p, act_p])
         .then(_.spread(function (curr_ent, act) {
           _.defer(() => $scope.$apply(function () {
@@ -92,7 +101,8 @@ module.exports = [
         date_stop: date_stop,
         act: curr_ent.act
       };
-      $scope.loading = true;
+      // $scope.loading = true;
+      setLoading()
       actP.add_ent(ent)
         .then(function (ent) {
           return actP.del_curr_ent(curr_ent.id);
@@ -119,7 +129,8 @@ module.exports = [
       }
     };
 
-    $scope.loading = true;
+    setLoading();
+    // $scope.loading = true;
     $scope.custom_stop = undefined;
 
     actP.on_curr_ent_change(update_ctrl_state);

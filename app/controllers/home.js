@@ -14,7 +14,7 @@ module.exports = [
 
     var get_curr_act = function () {
       return $scope.acts.filter(function (act) {
-        return act.id === $scope.ent.act;
+        return act.id === util.coerce_item_id($scope.ent.act);
       })[0];
     };
 

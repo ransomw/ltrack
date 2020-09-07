@@ -31,7 +31,7 @@ module.exports =[
         return undefined;
       }
       var act = $scope.acts.filter(function (act) {
-        return act.id === ent.act;
+        return act.id === util.coerce_item_id(ent.act);
       })[0];
       if (act) {
         return act;
@@ -49,7 +49,8 @@ module.exports =[
       if (ents) {
         return ents
           .filter(ent_filter)
-          .sort(util.cmp_ents);
+          // .sort(util.cmp_ents)
+        ;
       }
       return [];
     };

@@ -1,5 +1,5 @@
 const moment = require('moment');
-const logged_in = require('./hoodie_iface').auth.logged_in;
+const logged_in = require('./hoodie_iface_mock').auth.logged_in;
 const CONST = require('./constants.js');
 
 // int_ = {start: X, end: Y}, where X and Y support comparison
@@ -101,9 +101,15 @@ exports.arr_elem = function(arr, opt_args) {
   if (!Array.isArray(arr)) {
     throw new Error("arr_elem expects array argument");
   }
-  if (arr.length > 1 ||
-      (opts.allow_undef && arr.length === 0)) {
-    throw new Error(CONST.UTIL_ERRS.num);
+  if (opts.allow_undef) {
+    if (arr.length > 1) {
+      throw new Error(CONST.UTIL_ERRS.num);
+    }
+  } else {
+    if (arr.length > 1 ||
+        arr.length < 0) {
+      throw new Error(CONST.UTIL_ERRS.num);
+    }
   }
   return arr[0];
 };
@@ -116,5 +122,21 @@ exports.combine_date_time = function (date, time) {
                   time.getMinutes(),
                   time.getSeconds());
 };
+
+/* note on angular usage from from hoodie conversion:
+ * $scope.ent.act is set by using the ng-model
+ * attribute/directive/whatev' in the home.html partial.
+ *
+ * long angular story later, angular has converted
+ * _previously_ UUID (string type) from hoodie to string,
+ * np.  now that ids are integers, the string conversion
+ * from the Angular side is clearer.
+ **
+ * this function coerces _from_ angular (stringification)
+ * _to_ internal representation (integer).
+ */
+exports.coerce_item_id = (id) => {
+  return parseInt(id)
+}
 
 module.exports = exports;

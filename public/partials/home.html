@@ -52,6 +52,7 @@
             </select>
             <button ng-click="addEnt(entForm)"
                     ng-disabled="loading"
+                    ng-show="acts && currActIsPt()"
                     class="btn">
               Go!
             </button>
@@ -92,11 +93,14 @@
                   <input type="time" name="time-stop" id="time-stop"
                          ng-model="custom_date.stop.time">
                 </div>
+                <button ng-click="addEnt(entForm)"
+                        ng-disabled="loading"
+                        class="btn">
+                  Done!
+                </button>
               </div>
             </div>
-
           </div>
-
         </form>
       </div>
       <div ng-hide="acts && acts.length !== 0">

@@ -24,7 +24,11 @@ module.exports = [
         .then(function (ents) {
           $scope.$apply(function () {
             $scope.ents = ents.filter(function (ent) {
-              return ent.act === $routeParams.id;
+              return util.coerce_item_id(
+                ent.act
+              )=== util.coerce_item_id(
+                $routeParams.id
+              )
             }).sort(util.cmp_ents);
           });
         }, function (err) { util.log_throw_err(err); })

@@ -1,6 +1,7 @@
-const CONST = require('../constants');
-const store = require('../hoodie_iface').store;
-const arr_elem = require('../util').arr_elem;
+const CONST = require('../constants')
+const store = require('../hoodie_iface_mock').store
+const arr_elem = require('../util').arr_elem
+const coerce_item_id = require('../util').coerce_item_id
 
 const make_err = function (type, msg) {
   return new Error([type, msg].join(':'));
@@ -20,7 +21,7 @@ const get_acts = function () {
 const get_act = function (act_id) {
   return get_acts().then(function (acts) {
     return arr_elem(acts.filter(function (act) {
-      return act.id === act_id;
+      return act.id === coerce_item_id(act_id);
     }));
   });
 };
@@ -81,7 +82,7 @@ const get_ents = function () {
 
 /* delete entry */
 const del_ent = function (ent_id) {
-  return store.del(CONST.STORE_TYPES.ent, ent_id);
+  return store.del(CONST.STORE_TYPES.ent, coerce_item_id(ent_id));
 };
 
 const add_curr_ent = function (ent) {
@@ -115,8 +116,8 @@ const get_curr_ent = function () {
 
 const del_curr_ent = function (curr_ent_id) {
   return store.del(
-    CONST.STORE_TYPES.curr_ent, curr_ent_id);
-};
+    CONST.STORE_TYPES.curr_ent, coerce_item_id(curr_ent_id))
+}
 
 /* register callback */
 const on_curr_ent_change = function (cb) {
